@@ -115,16 +115,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 }
 </style>
 
+
 <section class="payment-card">
-  <h2>🎟️ شرکت در قرعه‌کشی</h2>
+  <h2>💎 انتقال TON</h2>
 
   <p>
-    برای شرکت در قرعه‌کشی، میزان TON موردنظر خود را انتخاب کنید.
+    مبلغ و آدرس گیرنده را انتخاب کنید.
     <br>
-    Для участия выберите сумму TON.
+    Выберите сумму и адрес получателя.
     <br>
-    To participate, choose your TON amount.
+    Choose the amount and recipient address.
   </p>
+
+  <input
+    id="recipientAddress"
+    type="text"
+    placeholder="TON recipient address"
+    style="width:100%;box-sizing:border-box;padding:12px;margin:10px 0;border-radius:10px;"
+  >
 
   <div class="amount-box">
     <button id="minusBtn" type="button">−</button>
@@ -132,36 +140,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     <button id="plusBtn" type="button">+</button>
   </div>
 
-  <div class="treasury-box">
-    <small>
-      آدرس خزانه / Адрес казны / Treasury address
-    </small>
-    <div id="treasuryPaymentAddress">در حال دریافت...</div>
-
-    <button id="copyTreasury" type="button">
-      📋 کپی / Копировать / Copy
-    </button>
-  </div>
-
   <button id="sendTonBtn" type="button" class="send-btn">
-    💎 ادامه / Продолжить / Continue
+    💎 تأیید و ارسال / Подтвердить и отправить / Confirm & Send
   </button>
 
   <p class="security-note">
-    🔐 تراکنش فقط پس از بررسی و تأیید شما در کیف پول انجام می‌شود.
+    🔐 تراکنش فقط پس از تأیید شما در کیف پول انجام می‌شود.
     <br>
-    🔐 Транзакция выполняется только после вашей проверки и подтверждения.
+    🔐 Транзакция выполняется только после вашего подтверждения.
     <br>
-    🔐 The transaction requires your review and confirmation.
+    🔐 The transaction is sent only after your confirmation.
   </p>
+
+  <p id="txStatus"></p>
 </section>
+
+
 
 <script>
 (function () {
   let amount = 0.1;
 
   const amountEl = document.getElementById("amountValue");
-  const addressEl = document.getElementById("treasuryPaymentAddress");
+  const statusEl = document.getElementById("txStatus");
 
   function render() {
     amountEl.textContent = amount.toFixed(1) + " TON";
@@ -177,41 +178,54 @@ document.addEventListener("DOMContentLoaded", async () => {
     render();
   };
 
-  document.getElementById("copyTreasury").onclick = async () => {
-    const address = addressEl.textContent.trim();
-    if (!address || address === "در حال دریافت...") return;
+  document.getElementById("sendTonBtn").onclick = async () => {
+    const recipient =
+      document.getElementById("recipientAddress").value.trim();
+
+    if (!recipient) {
+      statusEl.textContent =
+        "لطفاً آدرس گیرنده را وارد کنید.";
+      return;
+    }
+
+    if (!window.tonConnectUI) {
+      statusEl.textContent =
+        "TON Connect در دسترس نیست.";
+      return;
+    }
+
+    if (!window.tonConnectUI.wallet) {
+      await window.tonConnectUI.openModal();
+      return;
+    }
+
+    const amountNano =
+      String(Math.round(amount * 1000000000));
+
+    statusEl.textContent =
+      "در حال باز کردن کیف پول برای تأیید...";
 
     try {
-      await navigator.clipboard.writeText(address);
-      document.getElementById("copyTreasury").textContent =
-        "✅ کپی شد / Скопировано / Copied";
-    } catch (e) {
-      alert(address);
+      await window.tonConnectUI.sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 600,
+        messages: [{
+          address: recipient,
+          amount: amountNano
+        }]
+      });
+
+      statusEl.textContent =
+        "درخواست تراکنش به کیف پول ارسال شد.";
+    } catch (error) {
+      console.log(error);
+      statusEl.textContent =
+        "تراکنش لغو شد یا کیف پول آن را رد کرد.";
     }
   };
-
-  document.getElementById("sendTonBtn").onclick = () => {
-    alert(
-      "مبلغ انتخاب‌شده: " + amount.toFixed(1) +
-      " TON\n\n" +
-      "آدرس خزانه:\n" + addressEl.textContent +
-      "\n\nلطفاً تراکنش را فقط پس از بررسی کامل در کیف پول خود تأیید کنید."
-    );
-  };
-
-  fetch("/api/config")
-    .then(r => r.json())
-    .then(config => {
-      if (config.treasuryAddress) {
-        addressEl.textContent = config.treasuryAddress;
-      }
-    })
-    .catch(() => {
-      addressEl.textContent = "خطا در دریافت آدرس";
-    });
 
   render();
 })();
 </script>
+
 
 </body></html>
