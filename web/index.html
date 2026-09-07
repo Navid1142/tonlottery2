@@ -69,4 +69,149 @@ document.addEventListener("DOMContentLoaded", async () => {
 })();
 </script>
 
+
+<style>
+.payment-card {
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.08);
+}
+.amount-box {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:20px;
+  margin:18px 0;
+}
+.amount-box button {
+  width:42px;
+  height:42px;
+  border:0;
+  border-radius:12px;
+  font-size:24px;
+}
+.treasury-box {
+  margin:15px 0;
+  padding:12px;
+  border-radius:12px;
+  word-break:break-all;
+}
+#treasuryPaymentAddress {
+  margin-top:8px;
+  font-size:12px;
+}
+.send-btn {
+  width:100%;
+  padding:14px;
+  border:0;
+  border-radius:14px;
+  font-size:16px;
+}
+.security-note {
+  font-size:12px;
+  line-height:1.8;
+  opacity:.8;
+}
+</style>
+
+<section class="payment-card">
+  <h2>🎟️ شرکت در قرعه‌کشی</h2>
+
+  <p>
+    برای شرکت در قرعه‌کشی، میزان TON موردنظر خود را انتخاب کنید.
+    <br>
+    Для участия выберите сумму TON.
+    <br>
+    To participate, choose your TON amount.
+  </p>
+
+  <div class="amount-box">
+    <button id="minusBtn" type="button">−</button>
+    <strong id="amountValue">0.1 TON</strong>
+    <button id="plusBtn" type="button">+</button>
+  </div>
+
+  <div class="treasury-box">
+    <small>
+      آدرس خزانه / Адрес казны / Treasury address
+    </small>
+    <div id="treasuryPaymentAddress">در حال دریافت...</div>
+
+    <button id="copyTreasury" type="button">
+      📋 کپی / Копировать / Copy
+    </button>
+  </div>
+
+  <button id="sendTonBtn" type="button" class="send-btn">
+    💎 ادامه / Продолжить / Continue
+  </button>
+
+  <p class="security-note">
+    🔐 تراکنش فقط پس از بررسی و تأیید شما در کیف پول انجام می‌شود.
+    <br>
+    🔐 Транзакция выполняется только после вашей проверки и подтверждения.
+    <br>
+    🔐 The transaction requires your review and confirmation.
+  </p>
+</section>
+
+<script>
+(function () {
+  let amount = 0.1;
+
+  const amountEl = document.getElementById("amountValue");
+  const addressEl = document.getElementById("treasuryPaymentAddress");
+
+  function render() {
+    amountEl.textContent = amount.toFixed(1) + " TON";
+  }
+
+  document.getElementById("minusBtn").onclick = () => {
+    amount = Math.max(0.1, +(amount - 0.1).toFixed(1));
+    render();
+  };
+
+  document.getElementById("plusBtn").onclick = () => {
+    amount = Math.min(1.0, +(amount + 0.1).toFixed(1));
+    render();
+  };
+
+  document.getElementById("copyTreasury").onclick = async () => {
+    const address = addressEl.textContent.trim();
+    if (!address || address === "در حال دریافت...") return;
+
+    try {
+      await navigator.clipboard.writeText(address);
+      document.getElementById("copyTreasury").textContent =
+        "✅ کپی شد / Скопировано / Copied";
+    } catch (e) {
+      alert(address);
+    }
+  };
+
+  document.getElementById("sendTonBtn").onclick = () => {
+    alert(
+      "مبلغ انتخاب‌شده: " + amount.toFixed(1) +
+      " TON\n\n" +
+      "آدرس خزانه:\n" + addressEl.textContent +
+      "\n\nلطفاً تراکنش را فقط پس از بررسی کامل در کیف پول خود تأیید کنید."
+    );
+  };
+
+  fetch("/api/config")
+    .then(r => r.json())
+    .then(config => {
+      if (config.treasuryAddress) {
+        addressEl.textContent = config.treasuryAddress;
+      }
+    })
+    .catch(() => {
+      addressEl.textContent = "خطا در دریافت آدرس";
+    });
+
+  render();
+})();
+</script>
+
 </body></html>
