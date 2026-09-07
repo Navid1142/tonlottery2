@@ -131,9 +131,58 @@ document.addEventListener("DOMContentLoaded", async () => {
           throw new Error("مقدار باید بین 0.1 و 1 TON باشد.");
         }
 
-        const nanoTon = Math.round(amountTon * 1e9);
+        const wallet = window.tonConnectUI.wallet;
 
-        status.textContent = "در حال باز کردن کیف پول برای تأیید...";
+        if (!wallet || !wallet.account || !wallet.account.address) {
+          throw new Error("آدرس کیف پول پیدا نشد.");
+        }
+
+        status.textContent = "در حال بررسی موجودی کیف پول...";
+
+        /*
+         * مقدار انتقال بر حسب nanotons است.
+         * برای بررسی موجودی از API عمومی TON استفاده می‌کنیم.
+         */
+        const address = wallet.account.address;
+
+        const balanceResponse = await fetch(
+          "https://toncenter.com/api/v2/getAddressBalance?address=" +
+          encodeURIComponent(address)
+        );
+
+        if (!balanceResponse.ok) {
+          throw new Error("موجودی کیف پول قابل بررسی نیست.");
+        }
+
+        const balanceData = await balanceResponse.json();
+
+        if (!balanceData.ok || balanceData.result == null) {
+          throw new Error("موجودی کیف پول قابل دریافت نیست.");
+        }
+
+        const balanceNano = BigInt(balanceData.result);
+        const amountNano = BigInt(Math.round(amountTon * 1e9));
+
+        /*
+         * مقدار کمی برای کارمزد و هزینه پردازش در نظر می‌گیریم.
+         */
+        const feeReserve = 10000000n; // 0.01 TON
+        const requiredNano = amountNano + feeReserve;
+
+        if (balanceNano < requiredNano) {
+          const balanceTon = Number(balanceNano) / 1e9;
+
+          status.textContent =
+            "❌ موجودی کافی نیست. موجودی شما حدود " +
+            balanceTon.toFixed(4) +
+            " TON است و برای این تراکنش مقدار بیشتری لازم است.";
+
+          return;
+        }
+
+        status.textContent = "موجودی کافی است؛ در حال باز کردن کیف پول برای تأیید...";
+
+        const nanoTon = Math.round(amountTon * 1e9);
 
         const tx = {
           validUntil: Math.floor(Date.now() / 1000) + 300,
@@ -145,15 +194,41 @@ document.addEventListener("DOMContentLoaded", async () => {
           ]
         };
 
-        await window.tonConnectUI.sendTransaction(tx);
+        try {
+          await window.tonConnectUI.sendTransaction(tx);
 
-        status.textContent =
-          "تراکنش برای تأیید به کیف پول ارسال شد. نتیجه را در کیف پول بررسی کنید.";
+          status.textContent =
+            "✅ تراکنش توسط کیف پول ارسال شد. برای تأیید نهایی باید وضعیت تراکنش در شبکه TON بررسی شود.";
+
+        } catch (err) {
+          console.error("TON transaction error:", err);
+
+          const message = String(err?.message || err || "").toLowerCase();
+
+          if (
+            message.includes("reject") ||
+            message.includes("cancel") ||
+            message.includes("declin")
+          ) {
+            status.textContent = "❌ تراکنش توسط شما لغو شد.";
+          } else if (
+            message.includes("insufficient") ||
+            message.includes("balance") ||
+            message.includes("fund")
+          ) {
+            status.textContent =
+              "❌ موجودی کیف پول برای انجام این تراکنش کافی نیست.";
+          } else {
+            status.textContent =
+              "❌ تراکنش انجام نشد. کیف پول یا شبکه TON خطا برگرداند.";
+          }
+        }
 
       } catch (err) {
         console.error(err);
+
         status.textContent =
-          "تراکنش لغو شد یا خطایی رخ داد.";
+          "❌ " + (err?.message || "خطایی هنگام بررسی یا ارسال تراکنش رخ داد.");
       }
     });
 
