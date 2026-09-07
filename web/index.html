@@ -1,4 +1,35 @@
 <!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TON Lottery</title><script src="https://telegram.org/js/telegram-web-app.js"></script><script src="https://unpkg.com/@tonconnect/ui@2.3.0/dist/tonconnect-ui.min.js"></script><style>body{font-family:system-ui,sans-serif;background:#07111f;color:#fff;margin:0}.wrap{max-width:720px;margin:auto;padding:18px}.card{background:#101d31;border:1px solid #233653;border-radius:22px;padding:20px;margin:14px 0}.hero{text-align:center;padding:28px 15px}.bar{height:18px;background:#263750;border-radius:99px;overflow:hidden}.fill{height:100%;width:0;background:#42a5ff}.row{display:flex;justify-content:space-between;gap:12px;margin:12px 0}.muted{color:#9fb0c7}.btn{display:block;width:100%;box-sizing:border-box;padding:13px 16px;border:0;border-radius:12px;cursor:pointer;text-align:center;text-decoration:none;margin:10px 0;font-weight:700}.join{background:#229ed9;color:white}.check{background:#243956;color:white}.pill{background:#18385b;padding:5px 9px;border-radius:20px}.warning{color:#ffd166}.ok{color:#6ee7a8}.lang{font-size:.92rem;line-height:1.7}.secure{text-align:center;line-height:1.8}</style></head><body><div class="wrap">
+
+<section class="card" id="payment-card">
+<h2>💎 اتصال کیف پول</h2>
+<div id="ton-connect"></div>
+
+<div style="margin-top:15px">
+<div>مقصد انتقال:</div>
+<div id="treasury" style="direction:ltr;word-break:break-all;font-size:12px">
+در حال دریافت آدرس خزانه...
+</div>
+</div>
+
+<div style="margin-top:15px">
+<label>مقدار TON:</label>
+<select id="amount" style="width:100%;padding:12px;margin-top:8px;border-radius:10px">
+<option value="0.1">0.1 TON</option>
+<option value="0.25">0.25 TON</option>
+<option value="0.5">0.5 TON</option>
+<option value="1">1 TON</option>
+</select>
+</div>
+
+<button id="sendTon" class="btn" style="margin-top:15px">
+💎 ارسال TON
+</button>
+
+<div id="txStatus" style="margin-top:12px">
+کیف پول خود را متصل کنید.
+</div>
+</section>
+
 <section class="card" id="profileCard" style="display:none">
   <div style="display:flex;align-items:center;gap:14px">
     <img id="userPhoto" src="" alt="" style="width:58px;height:58px;border-radius:50%;object-fit:cover;display:none">
