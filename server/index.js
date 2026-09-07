@@ -1,0 +1,37 @@
+const TelegramBot = require('node-telegram-bot-api');
+require('dotenv').config();
+const express=require('express');
+const crypto=require('crypto');
+const path=require('path');
+const app=express();
+const PORT=process.env.PORT||3000;
+app.use(express.json());
+app.use(express.static(path.join(__dirname,'..','web')));
+
+const round={id:1,targetTon:1000000,maxPerUserTon:1,minPerEntryTon:.1,winners:1000,status:'OPEN',totalConfirmedTon:0};
+function validateInitData(initData){
+  if(!initData||!process.env.TELEGRAM_BOT_TOKEN) return {ok:false,error:'Telegram validation is not configured'};
+  const p=new URLSearchParams(initData); const hash=p.get('hash'); if(!hash) return {ok:false,error:'Missing hash'};
+  p.delete('hash'); const dataCheck=[...p.entries()].sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>`${k}=${v}`).join('\n');
+  const secret=crypto.createHmac('sha256','WebAppData').update(process.env.TELEGRAM_BOT_TOKEN).digest();
+  const calc=crypto.createHmac('sha256',secret).update(dataCheck).digest('hex');
+  return {ok:crypto.timingSafeEqual(Buffer.from(calc),Buffer.from(hash)),data:p};
+}
+app.get('/api/config',(req,res)=>res.json({round,publicAppUrl:process.env.PUBLIC_APP_URL||null,treasuryAddress:process.env.TREASURY_ADDRESS||null,realPaymentEnabled:false}));
+app.post('/api/telegram/session',(req,res)=>{const r=validateInitData(req.body?.initData); if(!r.ok)return res.status(401).json(r); let user=null; try{user=JSON.parse(r.data.get('user')||'null')}catch{} res.json({ok:true,user});});
+app.get('/api/channel/status',async (req,res)=>{
+  try {
+    const userId=String(req.query.userId||'');
+    if(!userId) return res.status(400).json({ok:false,error:'Missing userId'});
+    if(!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHANNEL) return res.status(503).json({ok:false,error:'Channel membership check is not configured'});
+    const url=`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/getChatMember?chat_id=${encodeURIComponent(process.env.TELEGRAM_CHANNEL)}&user_id=${encodeURIComponent(userId)}`;
+    const r=await fetch(url); const data=await r.json();
+    if(!data.ok) return res.status(502).json({ok:false,error:data.description||'Telegram API error'});
+    const status=data.result?.status;
+    const joined=['creator','administrator','member'].includes(status) || (status==='restricted' && data.result?.is_member===true);
+    res.json({ok:true,joined,status});
+  } catch(e) { res.status(500).json({ok:false,error:e.message}); }
+});
+app.post('/api/payment/verify',(req,res)=>res.status(501).json({ok:false,error:'Real-money payment verification is intentionally not implemented in this shell.'}));
+app.get('/*splat',(req,res)=>res.sendFile(path.join(__dirname,'..','web','index.html')));
+app.listen(PORT,()=>console.log(`Mini App shell running on http://127.0.0.1:${PORT}`));

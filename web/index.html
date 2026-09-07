@@ -1,0 +1,72 @@
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TON Lottery</title><script src="https://telegram.org/js/telegram-web-app.js"></script><script src="https://unpkg.com/@tonconnect/ui@2.3.0/dist/tonconnect-ui.min.js"></script><style>body{font-family:system-ui,sans-serif;background:#07111f;color:#fff;margin:0}.wrap{max-width:720px;margin:auto;padding:18px}.card{background:#101d31;border:1px solid #233653;border-radius:22px;padding:20px;margin:14px 0}.hero{text-align:center;padding:28px 15px}.bar{height:18px;background:#263750;border-radius:99px;overflow:hidden}.fill{height:100%;width:0;background:#42a5ff}.row{display:flex;justify-content:space-between;gap:12px;margin:12px 0}.muted{color:#9fb0c7}.btn{display:block;width:100%;box-sizing:border-box;padding:13px 16px;border:0;border-radius:12px;cursor:pointer;text-align:center;text-decoration:none;margin:10px 0;font-weight:700}.join{background:#229ed9;color:white}.check{background:#243956;color:white}.pill{background:#18385b;padding:5px 9px;border-radius:20px}.warning{color:#ffd166}.ok{color:#6ee7a8}.lang{font-size:.92rem;line-height:1.7}.secure{text-align:center;line-height:1.8}</style></head><body><div class="wrap">
+<section class="card" id="profileCard" style="display:none">
+  <div style="display:flex;align-items:center;gap:14px">
+    <img id="userPhoto" src="" alt="" style="width:58px;height:58px;border-radius:50%;object-fit:cover;display:none">
+    <div>
+      <div class="muted">کاربر / Пользователь / User</div>
+      <strong id="userName">—</strong>
+      <div id="userUsername" class="muted"></div>
+    </div>
+  </div>
+</section>
+
+<section class="card hero"><h1>🎉 به بزرگترین قرعه‌کشی سال خوش آمدید</h1><h2>🎉 Добро пожаловать на крупнейшую лотерею года</h2><h3>🎉 Welcome to the Biggest Lottery of the Year</h3><p id="hello" class="muted">ابتدا عضویت کانال را تأیید کنید.</p><a class="btn join" href="https://t.me/BlastX_b" target="_blank">📢 عضویت در کانال / Подписаться / Join Channel</a><button class="btn check" id="checkBtn">✅ بررسی عضویت / Проверить / Check</button><p id="membership" class="warning">⏳ وضعیت عضویت بررسی نشده است.</p><div id="ton-connect"></div></section><section class="card"><div class="row"><b>پیشرفت / Прогресс / Progress</b><span id="progressText">0 / 1,000,000 TON</span></div><div class="bar"><div class="fill" id="fill"></div></div><div class="row"><span>حداقل / Минимум / Minimum</span><span>0.1 TON</span></div><div class="row"><span>حداکثر هر کاربر / Максимум / Max</span><span>1 TON</span></div><div class="row"><span>برندگان / Победители / Winners</span><span>1,000</span></div><p id="status" class="warning">وضعیت: OPEN</p></section><section class="card secure"><h2>🔐 امنیت / Безопасность / Security</h2><p>دارایی شما امن است و هیچ‌کس نمی‌تواند آن را دست‌کاری کند.</p><p>Ваши активы защищены, и никто не может изменить их без вашего подтверждения.</p><p>Your assets are protected, and no one can alter them without your confirmation.</p><p>برنامه برندگان را طبق سازوکار تعریف‌شده اعلام می‌کند و لیست برندگان در کانال منتشر می‌شود.</p><p>Приложение объявляет победителей согласно заданному механизму, а список публикуется в канале.</p><p>The app announces winners according to the defined mechanism, and the winners list is published in the channel.</p><p class="muted">کانال / Канал / Channel: @BlastX_b</p><p class="muted">خزانه / Казначейство / Treasury: <span id="treasury">—</span></p></section></div><script>
+const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand();}let round=null,user=null;
+async function boot(){const c=await fetch('/api/config').then(r=>r.json());round=c.round;document.querySelector('#treasury').textContent=c.treasuryAddress||'—';render();if(tg?.initData){const r=await fetch('/api/telegram/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData})}).then(x=>x.json());if(r.ok){user=r.user;document.querySelector('#hello').textContent='سلام '+(user.first_name||'دوست عزیز')+' / Здравствуйте / Hello 👋';}}}
+async function checkMembership(){if(!user?.id){document.querySelector('#membership').textContent='❌ این بررسی باید از داخل Telegram انجام شود. / Откройте приложение в Telegram. / Open in Telegram.';return;}document.querySelector('#membership').textContent='⏳ در حال بررسی...';const r=await fetch('/api/channel/status?userId='+encodeURIComponent(user.id)).then(x=>x.json());document.querySelector('#membership').textContent=r.ok&&r.joined?'✅ عضویت تأیید شد / Членство подтверждено / Membership confirmed':'❌ ابتدا عضو کانال شوید / Сначала подпишитесь / Join the channel first';document.querySelector('#membership').className=r.ok&&r.joined?'ok':'warning';}
+function render(){const pct=Math.min(100,(round.totalConfirmedTon/round.targetTon)*100);document.querySelector('#fill').style.width=pct+'%';document.querySelector('#progressText').textContent=Number(round.totalConfirmedTon).toLocaleString()+' / '+Number(round.targetTon).toLocaleString()+' TON';document.querySelector('#status').textContent='وضعیت / Статус / Status: '+round.status;}
+document.querySelector('#checkBtn').onclick=checkMembership;boot().catch(e=>document.querySelector('#status').textContent='خطا / Ошибка / Error: '+e.message);
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: window.location.origin + "/tonconnect-manifest.json",
+      buttonRootId: "ton-connect"
+    });
+
+    window.tonConnectUI = tonConnectUI;
+
+    const config = await fetch("/api/config").then(r => r.json());
+
+    if (config && config.treasuryAddress) {
+      document.getElementById("treasury").textContent = config.treasuryAddress;
+    }
+  } catch (e) {
+    console.error("TON Connect initialization failed:", e);
+  }
+});
+</script>
+
+
+<script>
+(function () {
+  const tg = window.Telegram && window.Telegram.WebApp;
+  if (!tg) return;
+
+  tg.ready();
+  tg.expand();
+
+  const user = tg.initDataUnsafe && tg.initDataUnsafe.user;
+  if (!user) return;
+
+  const card = document.getElementById("profileCard");
+  const name = [user.first_name, user.last_name].filter(Boolean).join(" ");
+
+  document.getElementById("userName").textContent = name || "Telegram User";
+
+  if (user.username) {
+    document.getElementById("userUsername").textContent = "@" + user.username;
+  }
+
+  if (user.photo_url) {
+    const img = document.getElementById("userPhoto");
+    img.src = user.photo_url;
+    img.style.display = "block";
+  }
+
+  card.style.display = "block";
+})();
+</script>
+
+</body></html>
