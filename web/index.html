@@ -13,7 +13,46 @@
 <section class="card hero"><h1>🎉 به بزرگترین قرعه‌کشی سال خوش آمدید</h1><h2>🎉 Добро пожаловать на крупнейшую лотерею года</h2><h3>🎉 Welcome to the Biggest Lottery of the Year</h3><p id="hello" class="muted">ابتدا عضویت کانال را تأیید کنید.</p><a class="btn join" href="https://t.me/BlastX_b" target="_blank">📢 عضویت در کانال / Подписаться / Join Channel</a><button class="btn check" id="checkBtn">✅ بررسی عضویت / Проверить / Check</button><p id="membership" class="warning">⏳ وضعیت عضویت بررسی نشده است.</p><div id="ton-connect"></div></section><section class="card"><div class="row"><b>پیشرفت / Прогресс / Progress</b><span id="progressText">0 / 1,000,000 TON</span></div><div class="bar"><div class="fill" id="fill"></div></div><div class="row"><span>حداقل / Минимум / Minimum</span><span>0.1 TON</span></div><div class="row"><span>حداکثر هر کاربر / Максимум / Max</span><span>1 TON</span></div><div class="row"><span>برندگان / Победители / Winners</span><span>1,000</span></div><p id="status" class="warning">وضعیت: OPEN</p></section><section class="card secure"><h2>🔐 امنیت / Безопасность / Security</h2><p>دارایی شما امن است و هیچ‌کس نمی‌تواند آن را دست‌کاری کند.</p><p>Ваши активы защищены, и никто не может изменить их без вашего подтверждения.</p><p>Your assets are protected, and no one can alter them without your confirmation.</p><p>برنامه برندگان را طبق سازوکار تعریف‌شده اعلام می‌کند و لیست برندگان در کانال منتشر می‌شود.</p><p>Приложение объявляет победителей согласно заданному механизму, а список публикуется в канале.</p><p>The app announces winners according to the defined mechanism, and the winners list is published in the channel.</p><p class="muted">کانال / Канал / Channel: @BlastX_b</p><p class="muted">خزانه / Казначейство / Treasury: <span id="treasury">—</span></p></section></div><script>
 const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand();}let round=null,user=null;
 async function boot(){const c=await fetch('/api/config').then(r=>r.json());round=c.round;document.querySelector('#treasury').textContent=c.treasuryAddress||'—';render();if(tg?.initData){const r=await fetch('/api/telegram/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData})}).then(x=>x.json());if(r.ok){user=r.user;document.querySelector('#hello').textContent='سلام '+(user.first_name||'دوست عزیز')+' / Здравствуйте / Hello 👋';}}}
-async function checkMembership(){if(!user?.id){document.querySelector('#membership').textContent='❌ این بررسی باید از داخل Telegram انجام شود. / Откройте приложение в Telegram. / Open in Telegram.';return;}document.querySelector('#membership').textContent='⏳ در حال بررسی...';const r=await fetch('/api/channel/status?userId='+encodeURIComponent(user.id)).then(x=>x.json());document.querySelector('#membership').textContent=r.ok&&r.joined?'✅ عضویت تأیید شد / Членство подтверждено / Membership confirmed':'❌ ابتدا عضو کانال شوید / Сначала подпишитесь / Join the channel first';document.querySelector('#membership').className=r.ok&&r.joined?'ok':'warning';}
+async function checkMembership(){
+  const el=document.querySelector('#membership');
+
+  if(!tg?.initData){
+    el.textContent='❌ این بررسی باید از داخل Telegram انجام شود. / Откройте приложение в Telegram. / Open in Telegram.';
+    el.className='warning';
+    return;
+  }
+
+  el.textContent='⏳ در حال بررسی عضویت...';
+  el.className='warning';
+
+  try{
+    const r=await fetch('/api/channel/status',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({initData:tg.initData})
+    });
+
+    const data=await r.json();
+
+    if(data.ok && data.joined){
+      el.textContent='✅ عضویت تأیید شد / Членство подтверждено / Membership confirmed';
+      el.className='ok';
+      return;
+    }
+
+    if(data.error){
+      console.error('Membership API:',data.error);
+    }
+
+    el.textContent='❌ ابتدا عضو کانال شوید و دوباره بررسی کنید / Сначала подпишитесь на канал и проверьте снова / Join the channel and check again';
+    el.className='warning';
+
+  }catch(e){
+    console.error(e);
+    el.textContent='❌ خطا در بررسی عضویت. دوباره تلاش کنید.';
+    el.className='warning';
+  }
+}
 function render(){const pct=Math.min(100,(round.totalConfirmedTon/round.targetTon)*100);document.querySelector('#fill').style.width=pct+'%';document.querySelector('#progressText').textContent=Number(round.totalConfirmedTon).toLocaleString()+' / '+Number(round.targetTon).toLocaleString()+' TON';document.querySelector('#status').textContent='وضعیت / Статус / Status: '+round.status;}
 document.querySelector('#checkBtn').onclick=checkMembership;boot().catch(e=>document.querySelector('#status').textContent='خطا / Ошибка / Error: '+e.message);
 </script>
