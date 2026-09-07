@@ -42,9 +42,19 @@ async function checkMembership(){
 
     if(data.error){
       console.error('Membership API:',data.error);
+
+      el.textContent=
+        '❌ خطای بررسی: '+data.error+
+        (data.telegramErrorCode ? ' ('+data.telegramErrorCode+')' : '');
+
+      el.className='warning';
+      return;
     }
 
-    el.textContent='❌ ابتدا عضو کانال شوید و دوباره بررسی کنید / Сначала подпишитесь на канал и проверьте снова / Join the channel and check again';
+    el.textContent=
+      '❌ ابتدا عضو کانال شوید و دوباره بررسی کنید / Сначала подпишитесь на канал и проверьте снова / Join the channel and check again'+
+      (data.status ? ' — Telegram: '+data.status : '');
+
     el.className='warning';
 
   }catch(e){

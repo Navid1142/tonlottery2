@@ -21,7 +21,7 @@ app.get('/api/config',(req,res)=>res.json({round,publicAppUrl:process.env.PUBLIC
 app.post('/api/telegram/session',(req,res)=>{const r=validateInitData(req.body?.initData); if(!r.ok)return res.status(401).json(r); let user=null; try{user=JSON.parse(r.data.get('user')||'null')}catch{} res.json({ok:true,user});});
 app.post('/api/channel/status',async (req,res)=>{
   try {
-    if(!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHANNEL) {
+    if(!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHANNEL){
       return res.status(503).json({
         ok:false,
         error:'Channel membership check is not configured'
@@ -30,7 +30,7 @@ app.post('/api/channel/status',async (req,res)=>{
 
     const session=validateInitData(req.body?.initData);
 
-    if(!session.ok) {
+    if(!session.ok){
       return res.status(401).json({
         ok:false,
         error:'Invalid Telegram session'
@@ -42,48 +42,67 @@ app.post('/api/channel/status',async (req,res)=>{
       user=JSON.parse(session.data.get('user')||'null');
     } catch {}
 
-    if(!user?.id) {
+    if(!user?.id){
       return res.status(400).json({
         ok:false,
         error:'Telegram user not found'
       });
     }
 
+    const channel=process.env.TELEGRAM_CHANNEL.trim();
+
     const url=
       `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`+
-      `/getChatMember?chat_id=${encodeURIComponent(process.env.TELEGRAM_CHANNEL)}`+
+      `/getChatMember?chat_id=${encodeURIComponent(channel)}`+
       `&user_id=${encodeURIComponent(String(user.id))}`;
 
-    const r=await fetch(url);
-    const data=await r.json();
+    console.log('[membership] checking user:',String(user.id));
+    console.log('[membership] channel:',channel);
 
-    if(!data.ok) {
+    const telegramResponse=await fetch(url);
+    const data=await telegramResponse.json();
+
+    console.log('[membership] Telegram response:',JSON.stringify(data));
+
+    if(!data.ok){
       return res.status(502).json({
         ok:false,
-        error:data.description||'Telegram API error'
+        error:data.description||'Telegram API error',
+        telegramErrorCode:data.error_code||null
       });
     }
 
-    const status=data.result?.status;
+    const member=data.result||{};
+    const status=member.status;
 
     const joined=
-      ['creator','administrator','member'].includes(status) ||
-      (status==='restricted' && data.result?.is_member===true);
+      status==='creator' ||
+      status==='administrator' ||
+      status==='member' ||
+      (status==='restricted' && member.is_member===true);
+
+    console.log('[membership] status:',status,'joined:',joined);
 
     res.json({
       ok:true,
       joined,
-      status
+      status,
+      debug:{
+        channel,
+        telegramStatus:status
+      }
     });
 
   } catch(e) {
-    console.error('Membership check error:',e);
+    console.error('[membership] error:',e);
+
     res.status(500).json({
       ok:false,
-      error:'Membership check failed'
+      error:e.message||'Membership check failed'
     });
   }
 });
+
 app.post('/api/payment/verify',(req,res)=>res.status(501).json({ok:false,error:'Real-money payment verification is intentionally not implemented in this shell.'}));
 app.get('/*splat',(req,res)=>res.sendFile(path.join(__dirname,'..','web','index.html')));
 app.listen(PORT,()=>console.log(`Mini App shell running on http://127.0.0.1:${PORT}`));
