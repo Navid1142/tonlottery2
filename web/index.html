@@ -19,213 +19,70 @@ document.querySelector('#checkBtn').onclick=checkMembership;boot().catch(e=>docu
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
+  const status = document.getElementById("txStatus");
+  const amountEl = document.getElementById("amount");
+  const sendBtn = document.getElementById("sendTon");
+  const treasuryEl = document.getElementById("treasury");
+
   try {
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: window.location.origin + "/tonconnect-manifest.json",
-      buttonRootId: "ton-connect"
-    });
-
-    window.tonConnectUI = tonConnectUI;
-
     const config = await fetch("/api/config").then(r => r.json());
 
-    if (config && config.treasuryAddress) {
-      document.getElementById("treasury").textContent = config.treasuryAddress;
+    if (!config || !config.treasuryAddress) {
+      throw new Error("Treasury address is not configured");
     }
-  } catch (e) {
-    console.error("TON Connect initialization failed:", e);
+
+    const treasury = config.treasuryAddress;
+    treasuryEl.textContent = treasury;
+
+    sendBtn.addEventListener("click", async () => {
+      try {
+        if (!window.tonConnectUI) {
+          throw new Error("TON Connect آماده نیست.");
+        }
+
+        if (!window.tonConnectUI.connected) {
+          await window.tonConnectUI.openModal();
+          return;
+        }
+
+        const amountTon = Number(amountEl.value);
+
+        if (!Number.isFinite(amountTon) || amountTon < 0.1 || amountTon > 1) {
+          throw new Error("مقدار باید بین 0.1 و 1 TON باشد.");
+        }
+
+        const nanoTon = Math.round(amountTon * 1e9);
+
+        status.textContent = "در حال باز کردن کیف پول برای تأیید...";
+
+        const tx = {
+          validUntil: Math.floor(Date.now() / 1000) + 300,
+          messages: [
+            {
+              address: treasury,
+              amount: String(nanoTon)
+            }
+          ]
+        };
+
+        await window.tonConnectUI.sendTransaction(tx);
+
+        status.textContent =
+          "تراکنش برای تأیید به کیف پول ارسال شد. نتیجه را در کیف پول بررسی کنید.";
+
+      } catch (err) {
+        console.error(err);
+        status.textContent =
+          "تراکنش لغو شد یا خطایی رخ داد.";
+      }
+    });
+
+  } catch (err) {
+    console.error(err);
+    status.textContent = "خطا در دریافت تنظیمات خزانه.";
+    sendBtn.disabled = true;
   }
-});
-</script>
-
-
-<script>
-(function () {
-  const tg = window.Telegram && window.Telegram.WebApp;
-  if (!tg) return;
-
-  tg.ready();
-  tg.expand();
-
-  const user = tg.initDataUnsafe && tg.initDataUnsafe.user;
-  if (!user) return;
-
-  const card = document.getElementById("profileCard");
-  const name = [user.first_name, user.last_name].filter(Boolean).join(" ");
-
-  document.getElementById("userName").textContent = name || "Telegram User";
-
-  if (user.username) {
-    document.getElementById("userUsername").textContent = "@" + user.username;
-  }
-
-  if (user.photo_url) {
-    const img = document.getElementById("userPhoto");
-    img.src = user.photo_url;
-    img.style.display = "block";
-  }
-
-  card.style.display = "block";
-})();
-</script>
-
-
-<style>
-.payment-card {
-  margin: 20px 0;
-  padding: 20px;
-  border-radius: 18px;
-  background: rgba(255,255,255,.08);
-}
-.amount-box {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:20px;
-  margin:18px 0;
-}
-.amount-box button {
-  width:42px;
-  height:42px;
-  border:0;
-  border-radius:12px;
-  font-size:24px;
-}
-.treasury-box {
-  margin:15px 0;
-  padding:12px;
-  border-radius:12px;
-  word-break:break-all;
-}
-#treasuryPaymentAddress {
-  margin-top:8px;
-  font-size:12px;
-}
-.send-btn {
-  width:100%;
-  padding:14px;
-  border:0;
-  border-radius:14px;
-  font-size:16px;
-}
-.security-note {
-  font-size:12px;
-  line-height:1.8;
-  opacity:.8;
-}
-</style>
-
-
-<section class="payment-card">
-  <h2>💎 انتقال TON</h2>
-
-  <p>
-    مبلغ و آدرس گیرنده را انتخاب کنید.
-    <br>
-    Выберите сумму и адрес получателя.
-    <br>
-    Choose the amount and recipient address.
-  </p>
-
-  <input
-    id="recipientAddress"
-    type="text"
-    placeholder="TON recipient address"
-    style="width:100%;box-sizing:border-box;padding:12px;margin:10px 0;border-radius:10px;"
-  >
-
-  <div class="amount-box">
-    <button id="minusBtn" type="button">−</button>
-    <strong id="amountValue">0.1 TON</strong>
-    <button id="plusBtn" type="button">+</button>
-  </div>
-
-  <button id="sendTonBtn" type="button" class="send-btn">
-    💎 تأیید و ارسال / Подтвердить и отправить / Confirm & Send
-  </button>
-
-  <p class="security-note">
-    🔐 تراکنش فقط پس از تأیید شما در کیف پول انجام می‌شود.
-    <br>
-    🔐 Транзакция выполняется только после вашего подтверждения.
-    <br>
-    🔐 The transaction is sent only after your confirmation.
-  </p>
-
-  <p id="txStatus"></p>
-</section>
-
-
-
-<script>
-(function () {
-  let amount = 0.1;
-
-  const amountEl = document.getElementById("amountValue");
-  const statusEl = document.getElementById("txStatus");
-
-  function render() {
-    amountEl.textContent = amount.toFixed(1) + " TON";
-  }
-
-  document.getElementById("minusBtn").onclick = () => {
-    amount = Math.max(0.1, +(amount - 0.1).toFixed(1));
-    render();
-  };
-
-  document.getElementById("plusBtn").onclick = () => {
-    amount = Math.min(1.0, +(amount + 0.1).toFixed(1));
-    render();
-  };
-
-  document.getElementById("sendTonBtn").onclick = async () => {
-    const recipient =
-      document.getElementById("recipientAddress").value.trim();
-
-    if (!recipient) {
-      statusEl.textContent =
-        "لطفاً آدرس گیرنده را وارد کنید.";
-      return;
-    }
-
-    if (!window.tonConnectUI) {
-      statusEl.textContent =
-        "TON Connect در دسترس نیست.";
-      return;
-    }
-
-    if (!window.tonConnectUI.wallet) {
-      await window.tonConnectUI.openModal();
-      return;
-    }
-
-    const amountNano =
-      String(Math.round(amount * 1000000000));
-
-    statusEl.textContent =
-      "در حال باز کردن کیف پول برای تأیید...";
-
-    try {
-      await window.tonConnectUI.sendTransaction({
-        validUntil: Math.floor(Date.now() / 1000) + 600,
-        messages: [{
-          address: recipient,
-          amount: amountNano
-        }]
-      });
-
-      statusEl.textContent =
-        "درخواست تراکنش به کیف پول ارسال شد.";
-    } catch (error) {
-      console.log(error);
-      statusEl.textContent =
-        "تراکنش لغو شد یا کیف پول آن را رد کرد.";
-    }
-  };
-
-  render();
-})();
-</script>
+});</script>
 
 
 </body></html>
