@@ -1,4 +1,201 @@
-<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TON Lottery</title><script src="https://telegram.org/js/telegram-web-app.js"></script><script src="https://unpkg.com/@tonconnect/ui@2.3.0/dist/tonconnect-ui.min.js"></script><style>body{font-family:system-ui,sans-serif;background:#07111f;color:#fff;margin:0}.wrap{max-width:720px;margin:auto;padding:18px}.card{background:#101d31;border:1px solid #233653;border-radius:22px;padding:20px;margin:14px 0}.hero{text-align:center;padding:28px 15px}.bar{height:18px;background:#263750;border-radius:99px;overflow:hidden}.fill{height:100%;width:0;background:#42a5ff}.row{display:flex;justify-content:space-between;gap:12px;margin:12px 0}.muted{color:#9fb0c7}.btn{display:block;width:100%;box-sizing:border-box;padding:13px 16px;border:0;border-radius:12px;cursor:pointer;text-align:center;text-decoration:none;margin:10px 0;font-weight:700}.join{background:#229ed9;color:white}.check{background:#243956;color:white}.pill{background:#18385b;padding:5px 9px;border-radius:20px}.warning{color:#ffd166}.ok{color:#6ee7a8}.lang{font-size:.92rem;line-height:1.7}.secure{text-align:center;line-height:1.8}</style></head><body><div class="wrap">
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TON Lottery</title><script src="https://telegram.org/js/telegram-web-app.js"></script><script src="https://unpkg.com/@tonconnect/ui@2.3.0/dist/tonconnect-ui.min.js"></script><style>body{font-family:system-ui,sans-serif;background:#07111f;color:#fff;margin:0}.wrap{max-width:720px;margin:auto;padding:18px}.card{background:#101d31;border:1px solid #233653;border-radius:22px;padding:20px;margin:14px 0}.hero{text-align:center;padding:28px 15px}.bar{height:18px;background:#263750;border-radius:99px;overflow:hidden}.fill{height:100%;width:0;background:#42a5ff}.row{display:flex;justify-content:space-between;gap:12px;margin:12px 0}.muted{color:#9fb0c7}.btn{display:block;width:100%;box-sizing:border-box;padding:13px 16px;border:0;border-radius:12px;cursor:pointer;text-align:center;text-decoration:none;margin:10px 0;font-weight:700}.join{background:#229ed9;color:white}.check{background:#243956;color:white}.pill{background:#18385b;padding:5px 9px;border-radius:20px}.warning{color:#ffd166}.ok{color:#6ee7a8}.lang{font-size:.92rem;line-height:1.7}.secure{text-align:center;line-height:1.8}</style>
+<!-- GRAND LOTTERY LUXURY UI -->
+<style id="grand-lottery-luxury">
+:root{
+  --gold:#f5c451;
+  --gold2:#ffe7a0;
+  --dark:#070604;
+  --panel:#12100b;
+  --line:rgba(245,196,81,.22);
+}
+
+html,body{
+  background:
+    radial-gradient(circle at 50% -15%,rgba(245,196,81,.20),transparent 38%),
+    radial-gradient(circle at 0% 100%,rgba(255,185,40,.07),transparent 32%),
+    var(--dark) !important;
+  color:#fff !important;
+}
+
+body{
+  overflow-x:hidden;
+}
+
+.wrap{
+  max-width:720px !important;
+  padding:14px !important;
+}
+
+.card{
+  position:relative;
+  background:
+    linear-gradient(145deg,rgba(27,23,15,.97),rgba(10,9,6,.97))
+    !important;
+  border:1px solid var(--line) !important;
+  border-radius:22px !important;
+  box-shadow:
+    0 12px 35px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,255,255,.035) !important;
+  overflow:hidden;
+}
+
+.card:before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:12%;
+  right:12%;
+  height:1px;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    var(--gold),
+    transparent
+  );
+  opacity:.75;
+}
+
+.hero{
+  padding:34px 18px !important;
+}
+
+.hero h1{
+  font-size:clamp(27px,7vw,44px) !important;
+  font-weight:900;
+  color:var(--gold2) !important;
+  text-shadow:
+    0 0 12px rgba(245,196,81,.28),
+    0 3px 20px rgba(0,0,0,.8);
+}
+
+.hero p{
+  color:#c7b98e !important;
+}
+
+.btn{
+  border:1px solid rgba(245,196,81,.35) !important;
+  background:
+    linear-gradient(135deg,#d49a22,#8e5d0c)
+    !important;
+  color:#fff !important;
+  font-weight:800 !important;
+  box-shadow:
+    0 5px 18px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.22);
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+
+.btn:active{
+  transform:scale(.98);
+}
+
+.join{
+  background:linear-gradient(135deg,#dca62e,#8e5d0c) !important;
+}
+
+.check{
+  background:linear-gradient(135deg,#302818,#17130c) !important;
+}
+
+.bar{
+  height:18px !important;
+  background:#080806 !important;
+  border:1px solid rgba(245,196,81,.18);
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.8);
+}
+
+.fill{
+  background:
+    linear-gradient(
+      90deg,
+      #9b680d,
+      #f5c451,
+      #ffe7a0
+    ) !important;
+  box-shadow:0 0 14px rgba(245,196,81,.45);
+  transition:width .6s ease;
+}
+
+.pill{
+  background:rgba(245,196,81,.09) !important;
+  border:1px solid rgba(245,196,81,.2);
+  color:#ffe7a0;
+}
+
+.muted{
+  color:#a99b79 !important;
+}
+
+.warning{
+  color:#ffd166 !important;
+}
+
+.ok{
+  color:#75e0a5 !important;
+}
+
+h2{
+  color:#f8dda0;
+  font-weight:800;
+}
+
+#payment-card{
+  border-color:rgba(245,196,81,.28) !important;
+}
+
+#profileCard{
+  border-color:rgba(245,196,81,.20) !important;
+}
+
+#participants-card{
+  border-color:rgba(245,196,81,.20) !important;
+}
+
+#participants-list > div{
+  transition:background .2s ease;
+}
+
+#participants-list > div:hover{
+  background:rgba(245,196,81,.045);
+}
+
+#ton-connect{
+  display:flex;
+  justify-content:center;
+}
+
+select{
+  background:#0b0906 !important;
+  color:#fff !important;
+  border:1px solid rgba(245,196,81,.25) !important;
+}
+
+.secure{
+  color:#e6dcc4;
+}
+
+@keyframes luxuryGlow{
+  0%,100%{
+    opacity:.72;
+  }
+  50%{
+    opacity:1;
+  }
+}
+
+.hero:after{
+  content:"✦ GRAND LOTTERY ✦";
+  display:block;
+  margin-top:20px;
+  color:var(--gold);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:3px;
+  animation:luxuryGlow 2.8s infinite;
+}
+</style>
+
+</head><body><div class="wrap">
 
 
 <section class="card" id="participants-card">
