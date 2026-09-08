@@ -530,9 +530,51 @@ margin-top:18px;
 .ring{width:82px;height:82px;min-width:82px}
 }
 </style>
+
+<style>
+.language-switcher{
+  width:min(1180px,calc(100% - 28px));
+  margin:14px auto 0;
+  display:flex;
+  justify-content:flex-end;
+  gap:7px;
+  position:relative;
+  z-index:20;
+}
+.language-switcher button{
+  border:1px solid rgba(212,175,55,.28);
+  background:rgba(255,255,255,.035);
+  color:#cfcfcf;
+  border-radius:999px;
+  padding:7px 12px;
+  font:inherit;
+  font-size:12px;
+  cursor:pointer;
+  transition:.2s ease;
+}
+.language-switcher button:hover{
+  border-color:rgba(212,175,55,.65);
+}
+.language-switcher button.active{
+  color:#111;
+  background:#d4af37;
+  border-color:#d4af37;
+  font-weight:700;
+}
+html[dir="rtl"] .language-switcher{
+  justify-content:flex-start;
+}
+</style>
+
 </head>
 
 <body>
+
+<div class="language-switcher" id="languageSwitcher" aria-label="Language">
+  <button type="button" data-lang="fa">فارسی</button>
+  <button type="button" data-lang="en">English</button>
+  <button type="button" data-lang="ru">Русский</button>
+</div>
 
 <div class="wrap">
 
@@ -541,33 +583,33 @@ margin-top:18px;
     <div class="logo">♛</div>
     <div>
       <b>TON GRAND LOTTERY</b>
-      <small>Premium Lottery Experience</small>
+      <small data-i18n="premium_experience">Premium Lottery Experience</small>
     </div>
   </div>
 
   <div class="live">
     <span class="dot"></span>
-    LIVE
+    <span data-i18n="live">LIVE</span>
   </div>
 </div>
 
 <section class="hero">
 
-  <div class="kicker">GRAND LOTTERY · ROUND #1</div>
+  <div class="kicker" data-i18n="round_title">GRAND LOTTERY · ROUND #1</div>
 
   <h1>
-    شانس خودت را برای
-    <span>جایزه بزرگ</span>
-    امتحان کن
+    <span data-i18n="hero_prefix">شانس خودت را برای</span>
+    <span data-i18n="grand_prize">جایزه بزرگ</span>
+    <span data-i18n="hero_suffix">امتحان کن</span>
   </h1>
 
-  <p>
+  <p data-i18n="hero_description">
     یک تجربه ساده، شفاف و لوکس برای شرکت در قرعه‌کشی TON.
     اتصال کیف پول و تأیید تراکنش توسط خود کیف پول انجام می‌شود.
   </p>
 
   <div class="jackpot">
-    <small>JACKPOT TARGET</small>
+    <small><span data-i18n="jackpot_target">JACKPOT TARGET</span></small>
     <strong>
       1,000,000 <span>TON</span>
     </strong>
@@ -576,12 +618,12 @@ margin-top:18px;
   <div class="stats">
 
     <div class="stat">
-      <small>حداقل ورود</small>
+      <small data-i18n="minimum_entry">حداقل ورود</small>
       <b>0.1 TON</b>
     </div>
 
     <div class="stat">
-      <small>حداکثر هر کاربر</small>
+      <small data-i18n="maximum_user">حداکثر هر کاربر</small>
       <b>1 TON</b>
     </div>
 
@@ -607,7 +649,7 @@ margin-top:18px;
 <section class="card">
 
   <div class="title">
-    <h2>وضعیت دوره</h2>
+    <h2 data-i18n="round_status">وضعیت دوره</h2>
     <span id="status">OPEN</span>
   </div>
 
@@ -620,7 +662,7 @@ margin-top:18px;
     <div class="progress-info">
 
       <div class="progress-row">
-        <span>جمع‌آوری شده</span>
+        <span data-i18n="collected">جمع‌آوری شده</span>
         <span id="progressText">
           0 / 1,000,000 TON
         </span>
@@ -630,7 +672,7 @@ margin-top:18px;
         <div class="fill" id="fill"></div>
       </div>
 
-      <div class="note">
+      <div class="note" data-i18n="progress_note">
         پیشرفت دوره به‌صورت خودکار نمایش داده می‌شود.
       </div>
 
@@ -643,30 +685,30 @@ margin-top:18px;
 <section class="card">
 
   <div class="title">
-    <h2>زمان باقی‌مانده</h2>
-    <span>ROUND #1</span>
+    <h2 data-i18n="time_remaining">زمان باقی‌مانده</h2>
+    <span data-i18n="round_number">ROUND #1</span>
   </div>
 
   <div class="count">
 
     <div class="time">
       <b id="days">07</b>
-      <small>روز</small>
+      <small data-i18n="days">روز</small>
     </div>
 
     <div class="time">
       <b id="hours">00</b>
-      <small>ساعت</small>
+      <small data-i18n="hours">ساعت</small>
     </div>
 
     <div class="time">
       <b id="minutes">00</b>
-      <small>دقیقه</small>
+      <small data-i18n="minutes">دقیقه</small>
     </div>
 
     <div class="time">
       <b id="seconds">00</b>
-      <small>ثانیه</small>
+      <small data-i18n="seconds">ثانیه</small>
     </div>
 
   </div>
@@ -678,9 +720,9 @@ margin-top:18px;
   <div class="wallet-head">
 
     <div>
-      <b>کیف پول TON</b>
+      <b data-i18n="ton_wallet">کیف پول TON</b>
       <small>
-        کیف پول را متصل کنید و مقدار ورود را انتخاب کنید.
+        <span data-i18n="wallet_desc">کیف پول را متصل کنید و مقدار ورود را انتخاب کنید.</span>
       </small>
     </div>
 
@@ -692,7 +734,7 @@ margin-top:18px;
 
   <div class="destination">
 
-    <small>آدرس خزانه / DESTINATION</small>
+    <small><span data-i18n="treasury_destination">آدرس خزانه / DESTINATION</span></small>
 
     <div id="treasury">
       در حال دریافت آدرس خزانه...
@@ -701,7 +743,7 @@ margin-top:18px;
   </div>
 
   <div class="amount-title">
-    مقدار شرکت در قرعه‌کشی
+    <span data-i18n="entry_amount">مقدار شرکت در قرعه‌کشی</span>
   </div>
 
   <select id="amount">
@@ -714,7 +756,7 @@ margin-top:18px;
   </select>
 
   <button id="sendTon">
-    ✦ ارسال TON و شرکت در قرعه‌کشی
+    <span data-i18n="send_ton">✦ ارسال TON و شرکت در قرعه‌کشی</span>
   </button>
 
   <div id="txStatus">
@@ -726,25 +768,25 @@ margin-top:18px;
 <section class="card">
 
   <div class="title">
-    <h2>عضویت در کانال</h2>
+    <h2 data-i18n="channel_membership">عضویت در کانال</h2>
     <span>@Big_lotter</span>
   </div>
 
   <div class="membership">
 
     <div id="membership" class="warning">
-      ⏳ وضعیت عضویت بررسی نشده است.
+      <span data-i18n="membership_not_checked">⏳ وضعیت عضویت بررسی نشده است.</span>
     </div>
 
     <a
       class="join"
       href="https://t.me/Big_lotter"
       target="_blank">
-      📢 عضویت در کانال
+      <span data-i18n="join_channel">📢 عضویت در کانال</span>
     </a>
 
     <button id="checkBtn">
-      ✓ بررسی عضویت
+      <span data-i18n="check_membership">✓ بررسی عضویت</span>
     </button>
 
   </div>
@@ -754,8 +796,8 @@ margin-top:18px;
 <section class="card">
 
   <div class="title">
-    <h2>فعالیت اخیر شما</h2>
-    <span>RECENT</span>
+    <h2 data-i18n="recent_activity">فعالیت اخیر شما</h2>
+    <span data-i18n="recent_label">RECENT</span>
   </div>
 
   <div id="activityList">
@@ -771,11 +813,11 @@ margin-top:18px;
       <div class="activity-info">
 
         <div class="activity-name">
-          هنوز تراکنشی ثبت نشده
+          <span data-i18n="no_activity">هنوز تراکنشی ثبت نشده</span>
         </div>
 
         <div class="activity-user">
-          پس از ارسال از این دستگاه نمایش داده می‌شود
+          <span data-i18n="activity_device_note">پس از ارسال از این دستگاه نمایش داده می‌شود</span>
         </div>
 
       </div>
@@ -785,7 +827,7 @@ margin-top:18px;
   </div>
 
   <div class="note">
-    نمایش این بخش به معنی تأیید نهایی تراکنش روی شبکه نیست.
+    <span data-i18n="not_final_confirmation">نمایش این بخش به معنی تأیید نهایی تراکنش روی شبکه نیست.</span>
   </div>
 
 </section>
@@ -793,29 +835,29 @@ margin-top:18px;
 <section class="card">
 
   <div class="title">
-    <h2>اطلاعات قرعه‌کشی</h2>
-    <span>DETAILS</span>
+    <h2 data-i18n="lottery_details">اطلاعات قرعه‌کشی</h2>
+    <span data-i18n="details_label">DETAILS</span>
   </div>
 
   <div class="grid">
 
     <div class="info">
-      <b>MINIMUM</b>
-      <span>حداقل ورود: 0.1 TON</span>
+      <b data-i18n="minimum_label">MINIMUM</b>
+      <span data-i18n="minimum_detail">حداقل ورود: 0.1 TON</span>
     </div>
 
     <div class="info">
-      <b>MAXIMUM</b>
-      <span>حداکثر هر کاربر: 1 TON</span>
+      <b data-i18n="maximum_label">MAXIMUM</b>
+      <span data-i18n="maximum_detail">حداکثر هر کاربر: 1 TON</span>
     </div>
 
     <div class="info">
-      <b>WINNERS</b>
-      <span>تعداد برندگان: 1,000</span>
+      <b data-i18n="winners_label">WINNERS</b>
+      <span data-i18n="winners_detail">تعداد برندگان: 1,000</span>
     </div>
 
     <div class="info">
-      <b>CHANNEL</b>
+      <b data-i18n="channel_label">CHANNEL</b>
       <span>@Big_lotter</span>
     </div>
 
@@ -823,7 +865,7 @@ margin-top:18px;
 
   <div class="destination">
 
-    <small>TREASURY</small>
+    <small data-i18n="treasury_label">TREASURY</small>
 
     <div id="treasuryFooter">—</div>
 
@@ -833,7 +875,7 @@ margin-top:18px;
 
 <div class="footer">
 TON GRAND LOTTERY<br>
-اتصال و تأیید تراکنش توسط کیف پول شما انجام می‌شود.
+<span data-i18n="footer_note">اتصال و تأیید تراکنش توسط کیف پول شما انجام می‌شود.</span>
 </div>
 
 </div>
@@ -913,14 +955,14 @@ function showProfile(){
     [user.first_name,user.last_name]
       .filter(Boolean)
       .join(' ') ||
-    'Telegram User';
+    tr('telegram_user');
 
   $('userName').textContent = fullName;
 
   $('userUsername').textContent =
     user.username
     ? '@' + user.username
-    : 'Telegram User';
+    : tr('telegram_user');
 
   if(user.photo_url){
 
@@ -992,7 +1034,7 @@ async function checkMembership(){
   if(!tg?.initData){
 
     el.textContent =
-      '❌ این بررسی باید از داخل Telegram انجام شود.';
+      tr('membership_telegram_only');
 
     el.className =
       'warning';
@@ -1002,7 +1044,7 @@ async function checkMembership(){
   }
 
   el.textContent =
-    '⏳ در حال بررسی عضویت...';
+    tr('membership_checking');
 
   el.className = '';
 
@@ -1025,7 +1067,7 @@ async function checkMembership(){
     if(data.ok && data.joined){
 
       el.textContent =
-        '✓ عضویت شما در کانال تأیید شد.';
+        tr('membership_verified');
 
       el.className =
         'ok';
@@ -1037,7 +1079,7 @@ async function checkMembership(){
     if(data.error){
 
       el.textContent =
-        '❌ خطا: ' + data.error;
+        tr('membership_error') + data.error;
 
       el.className =
         'warning';
@@ -1047,7 +1089,7 @@ async function checkMembership(){
     }
 
     el.textContent =
-      '❌ ابتدا عضو کانال شوید و دوباره بررسی کنید.';
+      tr('membership_join_first');
 
     el.className =
       'warning';
@@ -1057,7 +1099,7 @@ async function checkMembership(){
     console.error(error);
 
     el.textContent =
-      '❌ خطا در بررسی عضویت. دوباره تلاش کنید.';
+      tr('membership_failed');
 
     el.className =
       'warning';
@@ -1104,14 +1146,14 @@ function loadActivity(){
         <div class="activity-info">
 
           <div class="activity-name">
-            ${escapeHtml(item.name || 'Telegram User')}
+            ${escapeHtml(item.name || tr('telegram_user'))}
           </div>
 
           <div class="activity-user">
             ${escapeHtml(
               item.username
               ? '@' + item.username
-              : 'Telegram User'
+              : tr('telegram_user')
             )}
           </div>
 
@@ -1152,7 +1194,7 @@ function saveActivity(amount){
         ? [user.first_name,user.last_name]
             .filter(Boolean)
             .join(' ')
-        : 'Telegram User',
+        : tr('telegram_user'),
 
       username:
         user?.username || '',
@@ -1244,7 +1286,7 @@ async () => {
   if(!window.TON_CONNECT_UI){
 
     status.textContent =
-      '❌ کتابخانه TON Connect بارگذاری نشده است.';
+      tr('ton_library_error');
 
     sendBtn.disabled =
       true;
@@ -1271,12 +1313,12 @@ async () => {
       if(wallet){
 
         status.textContent =
-          '✓ کیف پول متصل شد. مقدار ورود را انتخاب کنید.';
+          tr('wallet_connected');
 
       }else{
 
         status.textContent =
-          'کیف پول خود را متصل کنید.';
+          tr('connect_wallet');
 
       }
 
@@ -1295,7 +1337,7 @@ async () => {
           if(!window.tonConnectUI.wallet){
 
             status.textContent =
-              '❌ کیف پول متصل نشد.';
+              tr('wallet_not_connected');
 
             return;
 
@@ -1313,7 +1355,7 @@ async () => {
         ){
 
           status.textContent =
-            '❌ مقدار باید بین 0.1 و 1 TON باشد.';
+            tr('amount_invalid');
 
           return;
 
@@ -1329,7 +1371,7 @@ async () => {
         ){
 
           status.textContent =
-            '❌ آدرس خزانه آماده نیست.';
+            tr('treasury_not_ready');
 
           return;
 
@@ -1364,7 +1406,7 @@ async () => {
           true;
 
         status.textContent =
-          '⏳ درخواست تراکنش برای کیف پول ارسال شد...';
+          tr('tx_pending');
 
         const result =
           await window.tonConnectUI
@@ -1378,7 +1420,7 @@ async () => {
         saveActivity(amount);
 
         status.textContent =
-          '✓ درخواست تراکنش ارسال شد.';
+          tr('tx_sent');
 
       }catch(error){
 
@@ -1390,11 +1432,10 @@ async () => {
         const message =
           error?.message ||
           error?.toString() ||
-          'خطای نامشخص';
+          tr('unknown_error');
 
         status.textContent =
-          '❌ تراکنش انجام نشد: ' +
-          message;
+          tr('tx_failed') + message;
 
       }finally{
 
@@ -1423,10 +1464,287 @@ boot()
   console.error(error);
 
   $('status').textContent =
-    'خطا در بارگذاری برنامه';
+    tr('loading_error');
 
 });
 
+</script>
+
+
+<script>
+(function(){
+  const translations = {
+    fa: {
+      premium_experience:"Premium Lottery Experience",
+      live:"LIVE",
+      round_title:"GRAND LOTTERY · ROUND #1",
+      hero_prefix:"شانس خودت را برای",
+      grand_prize:"جایزه بزرگ",
+      hero_suffix:"امتحان کن",
+      hero_description:"یک تجربه ساده، شفاف و لوکس برای شرکت در قرعه‌کشی TON. اتصال کیف پول و تأیید تراکنش توسط خود کیف پول انجام می‌شود.",
+      jackpot_target:"JACKPOT TARGET",
+      minimum_entry:"حداقل ورود",
+      maximum_user:"حداکثر هر کاربر",
+      round_status:"وضعیت دوره",
+      collected:"جمع‌آوری شده",
+      progress_note:"پیشرفت دوره به‌صورت خودکار نمایش داده می‌شود.",
+      round_number:"دوره #1",
+      recent_label:"اخیر",
+      details_label:"جزئیات",
+      minimum_label:"حداقل",
+      maximum_label:"حداکثر",
+      winners_label:"برندگان",
+      channel_label:"کانال",
+      treasury_label:"خزانه",
+      footer_note:"اتصال و تأیید تراکنش توسط کیف پول شما انجام می‌شود.",
+      time_remaining:"زمان باقی‌مانده",
+      days:"روز",
+      hours:"ساعت",
+      minutes:"دقیقه",
+      seconds:"ثانیه",
+      ton_wallet:"کیف پول TON",
+      wallet_desc:"کیف پول را متصل کنید و مقدار ورود را انتخاب کنید.",
+      treasury_destination:"آدرس خزانه / DESTINATION",
+      entry_amount:"مقدار شرکت در قرعه‌کشی",
+      send_ton:"✦ ارسال TON و شرکت در قرعه‌کشی",
+      channel_membership:"عضویت در کانال",
+      membership_not_checked:"⏳ وضعیت عضویت بررسی نشده است.",
+      join_channel:"📢 عضویت در کانال",
+      check_membership:"✓ بررسی عضویت",
+      recent_activity:"فعالیت اخیر شما",
+      no_activity:"هنوز تراکنشی ثبت نشده",
+      activity_device_note:"پس از ارسال از این دستگاه نمایش داده می‌شود",
+      not_final_confirmation:"نمایش این بخش به معنی تأیید نهایی تراکنش روی شبکه نیست.",
+      lottery_details:"اطلاعات قرعه‌کشی",
+      minimum_detail:"حداقل ورود: 0.1 TON",
+      maximum_detail:"حداکثر هر کاربر: 1 TON",
+      winners_detail:"تعداد برندگان: 1,000",
+      channel_detail:"CHANNEL",
+      treasury_detail:"TREASURY",
+      telegram_user:"کاربر تلگرام",
+      connect_wallet:"کیف پول خود را متصل کنید.",
+      wallet_connected:"✓ کیف پول متصل شد. مقدار ورود را انتخاب کنید.",
+      ton_library_error:"❌ کتابخانه TON Connect بارگذاری نشده است.",
+      wallet_not_connected:"❌ کیف پول متصل نشد.",
+      amount_invalid:"❌ مقدار باید بین 0.1 و 1 TON باشد.",
+      treasury_not_ready:"❌ آدرس خزانه آماده نیست.",
+      tx_pending:"⏳ درخواست تراکنش برای کیف پول ارسال شد...",
+      tx_sent:"✓ درخواست تراکنش ارسال شد.",
+      tx_failed:"❌ تراکنش انجام نشد: ",
+      unknown_error:"خطای نامشخص",
+      membership_telegram_only:"❌ این بررسی باید از داخل Telegram انجام شود.",
+      membership_checking:"⏳ در حال بررسی عضویت...",
+      membership_verified:"✓ عضویت شما در کانال تأیید شد.",
+      membership_error:"❌ خطا: ",
+      membership_join_first:"❌ ابتدا عضو کانال شوید و دوباره بررسی کنید.",
+      membership_failed:"❌ خطا در بررسی عضویت. دوباره تلاش کنید.",
+      loading_error:"خطا در بارگذاری برنامه"
+    },
+
+    en: {
+      premium_experience:"Premium Lottery Experience",
+      live:"LIVE",
+      round_title:"GRAND LOTTERY · ROUND #1",
+      hero_prefix:"Try your luck for the",
+      grand_prize:"Grand Prize",
+      hero_suffix:"today",
+      hero_description:"A simple, transparent and premium TON lottery experience. Wallet connection and transaction approval are handled by your own wallet.",
+      jackpot_target:"JACKPOT TARGET",
+      minimum_entry:"Minimum Entry",
+      maximum_user:"Maximum per User",
+      round_status:"Round Status",
+      collected:"Collected",
+      progress_note:"Round progress is updated automatically.",
+      round_number:"ROUND #1",
+      recent_label:"RECENT",
+      details_label:"DETAILS",
+      minimum_label:"MINIMUM",
+      maximum_label:"MAXIMUM",
+      winners_label:"WINNERS",
+      channel_label:"CHANNEL",
+      treasury_label:"TREASURY",
+      footer_note:"Wallet connection and transaction approval are handled by your wallet.",
+      time_remaining:"Time Remaining",
+      days:"Days",
+      hours:"Hours",
+      minutes:"Minutes",
+      seconds:"Seconds",
+      ton_wallet:"TON Wallet",
+      wallet_desc:"Connect your wallet and choose your entry amount.",
+      treasury_destination:"Treasury Address / DESTINATION",
+      entry_amount:"Lottery Entry Amount",
+      send_ton:"✦ Send TON & Enter Lottery",
+      channel_membership:"Channel Membership",
+      membership_not_checked:"⏳ Membership has not been checked.",
+      join_channel:"📢 Join Channel",
+      check_membership:"✓ Check Membership",
+      recent_activity:"Your Recent Activity",
+      no_activity:"No transactions recorded yet",
+      activity_device_note:"Shown after sending from this device",
+      not_final_confirmation:"This section does not mean the transaction has been finally confirmed on-chain.",
+      lottery_details:"Lottery Details",
+      minimum_detail:"Minimum Entry: 0.1 TON",
+      maximum_detail:"Maximum per User: 1 TON",
+      winners_detail:"Winners: 1,000",
+      channel_detail:"CHANNEL",
+      treasury_detail:"TREASURY",
+      telegram_user:"Telegram User",
+      connect_wallet:"Connect your wallet.",
+      wallet_connected:"✓ Wallet connected. Choose your entry amount.",
+      ton_library_error:"❌ TON Connect library failed to load.",
+      wallet_not_connected:"❌ Wallet was not connected.",
+      amount_invalid:"❌ Amount must be between 0.1 and 1 TON.",
+      treasury_not_ready:"❌ Treasury address is not ready.",
+      tx_pending:"⏳ Transaction request sent to your wallet...",
+      tx_sent:"✓ Transaction request sent.",
+      tx_failed:"❌ Transaction failed: ",
+      unknown_error:"Unknown error",
+      membership_telegram_only:"❌ This check must be performed from inside Telegram.",
+      membership_checking:"⏳ Checking membership...",
+      membership_verified:"✓ Your channel membership has been verified.",
+      membership_error:"❌ Error: ",
+      membership_join_first:"❌ Please join the channel first and try again.",
+      membership_failed:"❌ Membership check failed. Please try again.",
+      loading_error:"Error loading the app"
+    },
+
+    ru: {
+      premium_experience:"Премиальная лотерея",
+      live:"LIVE",
+      round_title:"БОЛЬШАЯ ЛОТЕРЕЯ · РАУНД №1",
+      hero_prefix:"Испытай удачу ради",
+      grand_prize:"Главного приза",
+      hero_suffix:"прямо сейчас",
+      hero_description:"Простая, прозрачная и премиальная лотерея TON. Подключение кошелька и подтверждение транзакции выполняются вашим кошельком.",
+      jackpot_target:"ЦЕЛЕВОЙ ДЖЕКПОТ",
+      minimum_entry:"Минимальный взнос",
+      maximum_user:"Максимум на пользователя",
+      round_status:"Статус раунда",
+      collected:"Собрано",
+      progress_note:"Прогресс раунда обновляется автоматически.",
+      round_number:"РАУНД №1",
+      recent_label:"НЕДАВНИЕ",
+      details_label:"ДЕТАЛИ",
+      minimum_label:"МИНИМУМ",
+      maximum_label:"МАКСИМУМ",
+      winners_label:"ПОБЕДИТЕЛИ",
+      channel_label:"КАНАЛ",
+      treasury_label:"КАЗНА",
+      footer_note:"Подключение кошелька и подтверждение транзакции выполняются вашим кошельком.",
+      time_remaining:"Оставшееся время",
+      days:"Дней",
+      hours:"Часов",
+      minutes:"Минут",
+      seconds:"Секунд",
+      ton_wallet:"TON Кошелёк",
+      wallet_desc:"Подключите кошелёк и выберите сумму участия.",
+      treasury_destination:"Адрес казначейства / DESTINATION",
+      entry_amount:"Сумма участия в лотерее",
+      send_ton:"✦ Отправить TON и участвовать",
+      channel_membership:"Подписка на канал",
+      membership_not_checked:"⏳ Подписка ещё не проверена.",
+      join_channel:"📢 Подписаться на канал",
+      check_membership:"✓ Проверить подписку",
+      recent_activity:"Ваша последняя активность",
+      no_activity:"Транзакций пока нет",
+      activity_device_note:"Показывается после отправки с этого устройства",
+      not_final_confirmation:"Этот раздел не означает окончательное подтверждение транзакции в сети.",
+      lottery_details:"Информация о лотерее",
+      minimum_detail:"Минимальный взнос: 0.1 TON",
+      maximum_detail:"Максимум на пользователя: 1 TON",
+      winners_detail:"Победителей: 1 000",
+      channel_detail:"КАНАЛ",
+      treasury_detail:"КАЗНА",
+      telegram_user:"Пользователь Telegram",
+      connect_wallet:"Подключите кошелёк.",
+      wallet_connected:"✓ Кошелёк подключён. Выберите сумму участия.",
+      ton_library_error:"❌ Не удалось загрузить библиотеку TON Connect.",
+      wallet_not_connected:"❌ Кошелёк не подключён.",
+      amount_invalid:"❌ Сумма должна быть от 0.1 до 1 TON.",
+      treasury_not_ready:"❌ Адрес казначейства ещё не готов.",
+      tx_pending:"⏳ Запрос транзакции отправлен в ваш кошелёк...",
+      tx_sent:"✓ Запрос транзакции отправлен.",
+      tx_failed:"❌ Транзакция не выполнена: ",
+      unknown_error:"Неизвестная ошибка",
+      membership_telegram_only:"❌ Проверка должна выполняться внутри Telegram.",
+      membership_checking:"⏳ Проверяем подписку...",
+      membership_verified:"✓ Ваша подписка на канал подтверждена.",
+      membership_error:"❌ Ошибка: ",
+      membership_join_first:"❌ Сначала подпишитесь на канал и попробуйте снова.",
+      membership_failed:"❌ Ошибка проверки подписки. Попробуйте снова.",
+      loading_error:"Ошибка загрузки приложения"
+    }
+  };
+
+  const supported = ["fa","en","ru"];
+
+  function detectLanguage(){
+    const saved = localStorage.getItem("tonLotteryLanguage");
+    if(supported.includes(saved)) return saved;
+
+    const code =
+      window.Telegram &&
+      window.Telegram.WebApp &&
+      window.Telegram.WebApp.initDataUnsafe &&
+      window.Telegram.WebApp.initDataUnsafe.user &&
+      window.Telegram.WebApp.initDataUnsafe.user.language_code;
+
+    if(code){
+      if(code.toLowerCase().startsWith("ru")) return "ru";
+      if(code.toLowerCase().startsWith("en")) return "en";
+      if(code.toLowerCase().startsWith("fa")) return "fa";
+    }
+
+    return "fa";
+  }
+
+  window.currentLotteryLanguage = detectLanguage();
+
+  window.tr = function(key){
+    return (
+      translations[window.currentLotteryLanguage] &&
+      translations[window.currentLotteryLanguage][key]
+    ) ||
+    translations.fa[key] ||
+    key;
+  };
+
+  window.applyLotteryLanguage = function(lang){
+    if(!supported.includes(lang)) return;
+
+    window.currentLotteryLanguage = lang;
+    localStorage.setItem("tonLotteryLanguage", lang);
+
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "fa" ? "rtl" : "ltr";
+
+    document.querySelectorAll("[data-i18n]").forEach(function(el){
+      const key = el.getAttribute("data-i18n");
+      if(translations[lang][key]) el.textContent = translations[lang][key];
+    });
+
+    document.querySelectorAll("#languageSwitcher button").forEach(function(btn){
+      btn.classList.toggle(
+        "active",
+        btn.getAttribute("data-lang") === lang
+      );
+    });
+
+    window.dispatchEvent(new CustomEvent("lotteryLanguageChanged", {
+      detail:{language:lang}
+    }));
+  };
+
+  document.addEventListener("DOMContentLoaded", function(){
+    document.querySelectorAll("#languageSwitcher button").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        window.applyLotteryLanguage(btn.getAttribute("data-lang"));
+      });
+    });
+
+    window.applyLotteryLanguage(window.currentLotteryLanguage);
+  });
+})();
 </script>
 
 </body>
