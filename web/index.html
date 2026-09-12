@@ -1181,7 +1181,7 @@ html[dir="rtl"] .language-switcher{
 
     <div class="stat">
       <small data-i18n="minimum_entry">حداقل ورود</small>
-      <b>0.1 TON</b>
+      <b>0.5 TON</b>
     </div>
 
     <div class="stat">
@@ -1310,8 +1310,6 @@ html[dir="rtl"] .language-switcher{
 
   <select id="amount">
 
-    <option value="0.1">0.1 TON</option>
-    <option value="0.25">0.25 TON</option>
     <option value="0.5">0.5 TON</option>
     <option value="1">1 TON</option>
 
@@ -1405,7 +1403,7 @@ html[dir="rtl"] .language-switcher{
 
     <div class="info">
       <b data-i18n="minimum_label">MINIMUM</b>
-      <span data-i18n="minimum_detail">حداقل ورود: 0.1 TON</span>
+      <span data-i18n="minimum_detail">مبلغ ورود: 0.5 یا 1 TON</span>
     </div>
 
     <div class="info">
@@ -1913,9 +1911,8 @@ async () => {
           Number(amountEl.value);
 
         if(
-          !Number.isFinite(amount) ||
-          amount < 0.1 ||
-          amount > 1
+          amount !== 0.5 &&
+          amount !== 1
         ){
 
           status.textContent =
@@ -2122,8 +2119,8 @@ boot()
       activity_device_note:"پس از ارسال از این دستگاه نمایش داده می‌شود",
       not_final_confirmation:"✓ تراکنش شما با موفقیت انجام شد و شما شامل قرعه‌کشی شدید.",
       lottery_details:"اطلاعات قرعه‌کشی",
-      minimum_detail:"حداقل ورود: 0.1 TON",
-      maximum_detail:"حداکثر هر کاربر: 1 TON",
+      minimum_detail:"مبلغ ورود: 0.5 یا 1 TON",
+      maximum_detail:"گزینه‌های ورود: 0.5 یا 1 TON",
       winners_detail:"تعداد برندگان: 1,000",
       channel_detail:"CHANNEL",
       treasury_detail:"TREASURY",
@@ -2132,7 +2129,7 @@ boot()
       wallet_connected:"✓ کیف پول متصل شد. مقدار ورود را انتخاب کنید.",
       ton_library_error:"❌ کتابخانه TON Connect بارگذاری نشده است.",
       wallet_not_connected:"❌ کیف پول متصل نشد.",
-      amount_invalid:"❌ مقدار باید بین 0.1 و 1 TON باشد.",
+      amount_invalid:"❌ فقط 0.5 یا 1 TON قابل انتخاب است.",
       treasury_not_ready:"❌ آدرس خزانه آماده نیست.",
       tx_pending:"⏳ درخواست تراکنش برای کیف پول ارسال شد...",
       tx_sent:"✓ تراکنش شما با موفقیت انجام شد و شما شامل قرعه‌کشی شدید.",
@@ -2189,8 +2186,8 @@ boot()
       activity_device_note:"Shown after sending from this device",
       not_final_confirmation:"✓ تراکنش شما با موفقیت انجام شد و شما شامل قرعه‌کشی شدید.",
       lottery_details:"Lottery Details",
-      minimum_detail:"Minimum Entry: 0.1 TON",
-      maximum_detail:"Maximum per User: 1 TON",
+      minimum_detail:"Entry options: 0.5 or 1 TON",
+      maximum_detail:"Entry options: 0.5 or 1 TON",
       winners_detail:"Winners: 1,000",
       channel_detail:"CHANNEL",
       treasury_detail:"TREASURY",
@@ -2199,7 +2196,7 @@ boot()
       wallet_connected:"✓ Wallet connected. Choose your entry amount.",
       ton_library_error:"❌ TON Connect library failed to load.",
       wallet_not_connected:"❌ Wallet was not connected.",
-      amount_invalid:"❌ Amount must be between 0.1 and 1 TON.",
+      amount_invalid:"❌ Only 0.5 or 1 TON can be selected.",
       treasury_not_ready:"❌ Treasury address is not ready.",
       tx_pending:"⏳ Transaction request sent to your wallet...",
       tx_sent:"✓ Your transaction was successful and you are included in the lottery.",
@@ -2256,8 +2253,8 @@ boot()
       activity_device_note:"Показывается после отправки с этого устройства",
       not_final_confirmation:"✓ Транзакция успешно выполнена, вы участвуете в лотерее.",
       lottery_details:"Информация о лотерее",
-      minimum_detail:"Минимальный взнос: 0.1 TON",
-      maximum_detail:"Максимум на пользователя: 1 TON",
+      minimum_detail:"Варианты участия: 0.5 или 1 TON",
+      maximum_detail:"Варианты участия: 0.5 или 1 TON",
       winners_detail:"Победителей: 1 000",
       channel_detail:"КАНАЛ",
       treasury_detail:"КАЗНА",
@@ -2266,7 +2263,7 @@ boot()
       wallet_connected:"✓ Кошелёк подключён. Выберите сумму участия.",
       ton_library_error:"❌ Не удалось загрузить библиотеку TON Connect.",
       wallet_not_connected:"❌ Кошелёк не подключён.",
-      amount_invalid:"❌ Сумма должна быть от 0.1 до 1 TON.",
+      amount_invalid:"❌ Можно выбрать только 0.5 или 1 TON.",
       treasury_not_ready:"❌ Адрес казначейства ещё не готов.",
       tx_pending:"⏳ Запрос транзакции отправлен в ваш кошелёк...",
       tx_sent:"✓ Транзакция успешно выполнена, вы участвуете в лотерее.",
