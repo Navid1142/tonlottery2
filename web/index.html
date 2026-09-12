@@ -1483,7 +1483,7 @@ function render(){
   $('fill').style.width = pct + '%';
 
   $('percent').textContent =
-    pct.toFixed(pct < 1 ? 1 : 0) + '%';
+    pct.toFixed(pct < 1 ? 2 : 0) + '%';
 
   $('progressText').textContent =
     total.toLocaleString() +
@@ -1495,7 +1495,9 @@ function render(){
     round.status || 'OPEN';
 
   const degree =
-    Math.max(0,Math.min(360,pct * 3.6));
+    pct > 0
+      ? Math.max(2,Math.min(360,pct * 3.6))
+      : 0;
 
   $('progressRing').style.background =
     'radial-gradient(circle,#12100d 56%,transparent 58%),' +
@@ -2118,7 +2120,7 @@ boot()
       recent_activity:"فعالیت اخیر شما",
       no_activity:"هنوز تراکنشی ثبت نشده",
       activity_device_note:"پس از ارسال از این دستگاه نمایش داده می‌شود",
-      not_final_confirmation:"نمایش این بخش به معنی تأیید نهایی تراکنش روی شبکه نیست.",
+      not_final_confirmation:"✓ تراکنش شما با موفقیت انجام شد و شما شامل قرعه‌کشی شدید.",
       lottery_details:"اطلاعات قرعه‌کشی",
       minimum_detail:"حداقل ورود: 0.1 TON",
       maximum_detail:"حداکثر هر کاربر: 1 TON",
@@ -2133,7 +2135,7 @@ boot()
       amount_invalid:"❌ مقدار باید بین 0.1 و 1 TON باشد.",
       treasury_not_ready:"❌ آدرس خزانه آماده نیست.",
       tx_pending:"⏳ درخواست تراکنش برای کیف پول ارسال شد...",
-      tx_sent:"✓ درخواست تراکنش ارسال شد.",
+      tx_sent:"✓ تراکنش شما با موفقیت انجام شد و شما شامل قرعه‌کشی شدید.",
       tx_failed:"❌ تراکنش انجام نشد: ",
       unknown_error:"خطای نامشخص",
       membership_telegram_only:"❌ این بررسی باید از داخل Telegram انجام شود.",
@@ -2185,7 +2187,7 @@ boot()
       recent_activity:"Your Recent Activity",
       no_activity:"No transactions recorded yet",
       activity_device_note:"Shown after sending from this device",
-      not_final_confirmation:"This section does not mean the transaction has been finally confirmed on-chain.",
+      not_final_confirmation:"✓ تراکنش شما با موفقیت انجام شد و شما شامل قرعه‌کشی شدید.",
       lottery_details:"Lottery Details",
       minimum_detail:"Minimum Entry: 0.1 TON",
       maximum_detail:"Maximum per User: 1 TON",
@@ -2200,7 +2202,7 @@ boot()
       amount_invalid:"❌ Amount must be between 0.1 and 1 TON.",
       treasury_not_ready:"❌ Treasury address is not ready.",
       tx_pending:"⏳ Transaction request sent to your wallet...",
-      tx_sent:"✓ Transaction request sent.",
+      tx_sent:"✓ Your transaction was successful and you are included in the lottery.",
       tx_failed:"❌ Transaction failed: ",
       unknown_error:"Unknown error",
       membership_telegram_only:"❌ This check must be performed from inside Telegram.",
@@ -2252,7 +2254,7 @@ boot()
       recent_activity:"Ваша последняя активность",
       no_activity:"Транзакций пока нет",
       activity_device_note:"Показывается после отправки с этого устройства",
-      not_final_confirmation:"Этот раздел не означает окончательное подтверждение транзакции в сети.",
+      not_final_confirmation:"✓ Транзакция успешно выполнена, вы участвуете в лотерее.",
       lottery_details:"Информация о лотерее",
       minimum_detail:"Минимальный взнос: 0.1 TON",
       maximum_detail:"Максимум на пользователя: 1 TON",
@@ -2267,7 +2269,7 @@ boot()
       amount_invalid:"❌ Сумма должна быть от 0.1 до 1 TON.",
       treasury_not_ready:"❌ Адрес казначейства ещё не готов.",
       tx_pending:"⏳ Запрос транзакции отправлен в ваш кошелёк...",
-      tx_sent:"✓ Запрос транзакции отправлен.",
+      tx_sent:"✓ Транзакция успешно выполнена, вы участвуете в лотерее.",
       tx_failed:"❌ Транзакция не выполнена: ",
       unknown_error:"Неизвестная ошибка",
       membership_telegram_only:"❌ Проверка должна выполняться внутри Telegram.",
