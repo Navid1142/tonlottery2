@@ -2010,6 +2010,48 @@ async () => {
 
 });
 
+
+async function refreshLotteryProgress(){
+
+  try{
+
+    const response =
+      await fetch('/api/config?progress=' + Date.now(), {
+        cache:'no-store'
+      });
+
+    if(!response.ok){
+      return;
+    }
+
+    const config =
+      await response.json();
+
+    if(!config || !config.round){
+      return;
+    }
+
+    round = config.round;
+
+    render();
+
+    console.log(
+      '[progress] refreshed:',
+      round.totalConfirmedTon,
+      'TON'
+    );
+
+  }catch(error){
+
+    console.error(
+      '[progress] refresh failed:',
+      error
+    );
+
+  }
+
+}
+
 boot()
 .then(() => {
 

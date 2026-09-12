@@ -17,7 +17,90 @@ function validateInitData(initData){
   const calc=crypto.createHmac('sha256',secret).update(dataCheck).digest('hex');
   return {ok:crypto.timingSafeEqual(Buffer.from(calc),Buffer.from(hash)),data:p};
 }
-app.get('/api/config',(req,res)=>res.json({round,publicAppUrl:process.env.PUBLIC_APP_URL||null,treasuryAddress:process.env.TREASURY_ADDRESS||null,realPaymentEnabled:false}));
+async function updateRoundProgress(){
+  try{
+    const treasury=String(process.env.TREASURY_ADDRESS||'').trim();
+    if(!treasury) return;
+
+    const apiKey=process.env.TONCENTER_API_KEY || '';
+    const headers=apiKey ? {'X-API-Key':apiKey} : {};
+
+    const fourMonthsAgo =
+      Math.floor(Date.now()/1000) - (120 * 24 * 60 * 60);
+
+    let offset=0;
+    const limit=1000;
+    let totalNano=0n;
+    let pages=0;
+
+    while(pages<20){
+      const url=
+        'https://toncenter.com/api/v3/transactions?account='+
+        encodeURIComponent(treasury)+
+        '&start_utime='+fourMonthsAgo+
+        '&limit='+limit+
+        '&offset='+offset+
+        '&sort=desc';
+
+      const response=await fetch(url,{headers});
+      if(!response.ok) break;
+
+      const data=await response.json();
+      const transactions=
+        Array.isArray(data?.transactions)
+          ? data.transactions
+          : [];
+
+      if(!transactions.length) break;
+
+      for(const tx of transactions){
+        const msg=tx?.in_msg;
+        if(!msg) continue;
+
+        const value=BigInt(String(msg.value||'0'));
+        if(value<=0n) continue;
+
+        if(msg.bounced===true) continue;
+
+        totalNano+=value;
+      }
+
+      pages++;
+
+      if(transactions.length<limit) break;
+      offset+=limit;
+    }
+
+    round.totalConfirmedTon=
+      Number(totalNano)/1000000000;
+
+    console.log(
+      '[progress] confirmed:',
+      round.totalConfirmedTon,
+      'TON | since:',
+      new Date(fourMonthsAgo*1000).toISOString(),
+      '| pages:',
+      pages
+    );
+
+  }catch(error){
+    console.error(
+      '[progress] blockchain check failed:',
+      error.message
+    );
+  }
+}
+
+app.get('/api/config',async (req,res)=>{
+  await updateRoundProgress();
+
+  res.json({
+    round,
+    publicAppUrl:process.env.PUBLIC_APP_URL||null,
+    treasuryAddress:process.env.TREASURY_ADDRESS||null,
+    realPaymentEnabled:true
+  });
+});
 app.post('/api/telegram/session',(req,res)=>{const r=validateInitData(req.body?.initData); if(!r.ok)return res.status(401).json(r); let user=null; try{user=JSON.parse(r.data.get('user')||'null')}catch{} res.json({ok:true,user});});
 app.post('/api/channel/status',async (req,res)=>{
   try {
@@ -103,6 +186,21 @@ app.post('/api/channel/status',async (req,res)=>{
   }
 });
 
-app.post('/api/payment/verify',(req,res)=>res.status(501).json({ok:false,error:'Real-money payment verification is intentionally not implemented in this shell.'}));
+app.post('/api/payment/verify',async (req,res)=>{
+  try{
+    await updateRoundProgress();
+
+    res.json({
+      ok:true,
+      round,
+      totalConfirmedTon:round.totalConfirmedTon
+    });
+  }catch(error){
+    res.status(500).json({
+      ok:false,
+      error:error.message||'Payment verification failed'
+    });
+  }
+});
 app.get('/*splat',(req,res)=>res.sendFile(path.join(__dirname,'..','web','index.html')));
 app.listen(PORT,()=>console.log(`Mini App shell running on http://127.0.0.1:${PORT}`));
