@@ -8,7 +8,7 @@ const PORT=process.env.PORT||3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname,'..','web')));
 
-const round={id:1,targetTon:1000000,maxPerUserTon:1,minPerEntryTon:.1,winners:1000,status:'OPEN',totalConfirmedTon:0};
+const round={id:1,targetTon:10000,maxPerUserTon:1,minPerEntryTon:.1,winners:1000,status:'OPEN',totalConfirmedTon:0};
 function validateInitData(initData){
   if(!initData||!process.env.TELEGRAM_BOT_TOKEN) return {ok:false,error:'Telegram validation is not configured'};
   const p=new URLSearchParams(initData); const hash=p.get('hash'); if(!hash) return {ok:false,error:'Missing hash'};
