@@ -529,6 +529,219 @@ margin-top:18px;
 .jackpot strong{font-size:28px}
 .ring{width:82px;height:82px;min-width:82px}
 }
+
+/* AI_NEON_DESIGN_V1 */
+:root{
+--bg:#050711;
+--card:#0d1220;
+--card2:#11192a;
+--gold:#9b8cff;
+--gold2:#d8d2ff;
+--gold3:#4edcff;
+--text:#f4f7ff;
+--muted:#8c98b2;
+--line:rgba(126,145,255,.20);
+--green:#63f5b1;
+--red:#ff7f9f;
+}
+
+html,body{
+background:
+radial-gradient(circle at 50% -15%,rgba(126,92,255,.24),transparent 35%),
+radial-gradient(circle at 0% 45%,rgba(52,215,255,.08),transparent 28%),
+linear-gradient(180deg,#080b15 0%,#03050b 100%);
+color:var(--text);
+}
+
+body{
+position:relative;
+}
+
+body:before{
+content:"";
+position:fixed;
+inset:0;
+pointer-events:none;
+background:
+linear-gradient(rgba(120,140,255,.025) 1px,transparent 1px),
+linear-gradient(90deg,rgba(120,140,255,.025) 1px,transparent 1px);
+background-size:32px 32px;
+mask-image:linear-gradient(to bottom,black,transparent 90%);
+}
+
+.logo{
+color:#080a13;
+background:linear-gradient(135deg,#ffffff,#a99aff 48%,#55e4ff);
+box-shadow:0 0 30px rgba(126,102,255,.35);
+}
+
+.brand b{
+letter-spacing:.3px;
+}
+
+.live{
+background:rgba(70,245,177,.035);
+border-color:rgba(99,245,177,.28);
+color:#8effc9;
+box-shadow:0 0 20px rgba(99,245,177,.05);
+}
+
+.hero{
+border-color:rgba(126,145,255,.30);
+background:
+radial-gradient(circle at 100% 0%,rgba(126,102,255,.25),transparent 35%),
+radial-gradient(circle at 0% 100%,rgba(55,220,255,.08),transparent 30%),
+linear-gradient(145deg,#131b30,#070a13);
+box-shadow:0 25px 65px rgba(0,0,0,.55),0 0 45px rgba(126,102,255,.08);
+}
+
+.kicker{
+color:#9e91ff;
+}
+
+.hero h1 span{
+color:#cfc8ff;
+text-shadow:0 0 24px rgba(126,102,255,.18);
+}
+
+.hero p{
+color:#929db6;
+}
+
+.jackpot{
+background:
+radial-gradient(circle at 100% 0%,rgba(126,102,255,.18),transparent 45%),
+linear-gradient(145deg,rgba(126,102,255,.10),rgba(61,221,255,.035));
+border-color:rgba(126,145,255,.20);
+}
+
+.jackpot strong{
+color:#e6e2ff;
+text-shadow:0 0 28px rgba(126,102,255,.25);
+}
+
+.jackpot strong span{
+color:#65ddff;
+}
+
+.stat,
+.info{
+background:rgba(255,255,255,.025);
+border-color:rgba(126,145,255,.15);
+}
+
+.card{
+background:
+linear-gradient(145deg,rgba(17,25,43,.82),rgba(6,9,17,.86));
+border-color:rgba(126,145,255,.16);
+box-shadow:0 18px 50px rgba(0,0,0,.38);
+backdrop-filter:blur(14px);
+}
+
+.title span{
+color:#72ddff;
+}
+
+.ring{
+background:
+radial-gradient(circle,#080d18 56%,transparent 58%),
+conic-gradient(#a89bff 0deg,#55e4ff 0deg,rgba(255,255,255,.055) 0deg);
+border-color:rgba(126,145,255,.22);
+box-shadow:0 0 30px rgba(126,102,255,.12);
+}
+
+.ring b{
+color:#dcd7ff;
+}
+
+.bar{
+background:#111827;
+}
+
+.fill{
+background:linear-gradient(90deg,#806cff,#55e4ff);
+box-shadow:0 0 14px rgba(85,228,255,.28);
+}
+
+.time{
+background:rgba(7,11,20,.78);
+border-color:rgba(126,145,255,.16);
+}
+
+.time b{
+color:#dcd7ff;
+}
+
+.wallet{
+background:
+radial-gradient(circle at 100% 0%,rgba(126,102,255,.22),transparent 38%),
+linear-gradient(145deg,#111a2d,#070b14);
+}
+
+.destination,
+.membership{
+background:rgba(7,11,20,.58);
+border-color:rgba(126,145,255,.15);
+}
+
+#treasury,#treasuryFooter{
+color:#bfcaff;
+}
+
+#amount{
+background:#070b14;
+border-color:rgba(126,145,255,.25);
+color:#f4f7ff;
+box-shadow:inset 0 0 20px rgba(126,102,255,.05);
+}
+
+#amount:focus{
+border-color:#8e7dff;
+box-shadow:0 0 0 3px rgba(126,102,255,.12),inset 0 0 20px rgba(126,102,255,.06);
+}
+
+#sendTon{
+color:#070914;
+background:linear-gradient(135deg,#e8e3ff,#a293ff 48%,#58e5ff);
+box-shadow:0 12px 32px rgba(105,91,255,.25);
+}
+
+.join{
+color:#070914;
+background:linear-gradient(135deg,#e8e3ff,#a293ff 48%,#58e5ff);
+box-shadow:0 10px 28px rgba(105,91,255,.18);
+}
+
+#checkBtn{
+background:rgba(126,102,255,.055);
+border-color:rgba(126,145,255,.22);
+color:#cfc8ff;
+}
+
+#txStatus{
+background:rgba(255,255,255,.025);
+border-color:rgba(126,145,255,.08);
+}
+
+.avatar,
+.activity img,
+.activity-avatar{
+background:#111827;
+border-color:rgba(126,145,255,.18);
+}
+
+.activity{
+border-bottom-color:rgba(126,145,255,.09);
+}
+
+.activity-amount{
+color:#cfc8ff;
+}
+
+.footer{
+color:#5f6c85;
+}
+
 </style>
 
 <style>
