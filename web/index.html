@@ -9,9 +9,17 @@
 <style>
 :root{--red:#ff174d;--red2:#ff315e;--cyan:#35d9ff;--gold:#ffc62d;--glass:rgba(7,10,17,.48);--line:rgba(255,255,255,.13);--text:#f7f8ff;--muted:#a5adbf}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:transparent;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button{font:inherit}body{overflow-x:hidden}
-body:before{content:"";position:fixed;inset:0;z-index:-8;background:radial-gradient(circle at 50% 25%,rgba(255,0,57,.24),transparent 34%),radial-gradient(circle at 15% 70%,rgba(75,0,255,.16),transparent 34%),radial-gradient(circle at 82% 55%,rgba(0,210,255,.10),transparent 30%),transparent}
-#bg{position:fixed;inset:0;z-index:-7;overflow:hidden;background:radial-gradient(circle at 50% 22%,rgba(255,0,55,.10),transparent 42%),repeating-linear-gradient(90deg,transparent 0 78px,rgba(255,0,55,.025) 79px 80px)}
-.scan{position:absolute;inset:-20%;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.018) 4px);animation:scan 8s linear infinite}.grid{position:absolute;left:-30%;right:-30%;bottom:-20%;height:65%;transform:perspective(500px) rotateX(62deg);background-image:linear-gradient(rgba(255,0,60,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,0,60,.09) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to top,black,transparent)}
+body:before{content:"";position:fixed;inset:0;z-index:-8;background:#000}
+#bg{position:fixed;inset:0;z-index:-7;overflow:hidden;background:#000;background-image:
+radial-gradient(circle at 8% 18%,#111 0 7px,transparent 8px),
+radial-gradient(circle at 23% 72%,#0b0b0b 0 4px,transparent 5px),
+radial-gradient(circle at 41% 32%,#121212 0 6px,transparent 7px),
+radial-gradient(circle at 63% 78%,#0c0c0c 0 5px,transparent 6px),
+radial-gradient(circle at 78% 24%,#101010 0 8px,transparent 9px),
+radial-gradient(circle at 91% 61%,#0b0b0b 0 4px,transparent 5px),
+radial-gradient(circle at 52% 12%,#090909 0 3px,transparent 4px);
+background-repeat:no-repeat}
+.scan{display:none}.grid{display:none}
 #robot{position:absolute;left:50%;top:2%;width:min(540px,92vw);height:600px;transform:translateX(-50%);opacity:1;filter:drop-shadow(0 0 35px rgba(255,198,45,.35));animation:none;background:radial-gradient(circle at 50% 50%,rgba(255,198,45,.08),transparent 48%)}#robot>*{display:none!important}#robot:before{content:"";position:absolute;left:50%;top:50%;width:min(430px,78vw);height:min(430px,78vw);transform:translate(-50%,-50%);background:#ffc62d;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);filter:drop-shadow(0 0 28px rgba(255,198,45,.55));z-index:0}#robot:after{content:"";position:absolute;left:50%;top:50%;width:min(250px,46vw);height:min(250px,46vw);transform:translate(-50%,-50%);background:#02050a;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);z-index:1}
 .head{position:absolute;left:50%;top:12px;width:205px;height:205px;transform:translateX(-50%) rotate(-3deg);border:1px solid rgba(255,255,255,.22);border-radius:42% 48% 45% 43%;background:linear-gradient(135deg,#202532 0,#07090f 42%,#240615 78%,#08090d 100%);box-shadow:inset 18px 12px 25px rgba(255,255,255,.04),inset -30px -10px 45px rgba(255,0,50,.16),0 0 70px rgba(255,0,50,.14)}
 .head:before{content:"";position:absolute;left:50%;top:50%;width:145px;height:18px;transform:translate(-50%,-50%) rotate(-1deg);border-radius:50%;background:linear-gradient(90deg,transparent,#ff164c 20%,#fff 50%,#ff164c 80%,transparent);filter:blur(3px);opacity:.8}
