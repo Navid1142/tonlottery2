@@ -1,263 +1,665 @@
 const { Bot } = require('node-telegram-bot-api');
+const { Address } = require('@ton/core');
 require('dotenv').config();
-const express=require('express');
-const crypto=require('crypto');
-const path=require('path');
-const app=express();
-const botToken=process.env.TELEGRAM_BOT_TOKEN;
-const publicAppUrl=String(process.env.PUBLIC_APP_URL||'').trim();
 
-if(botToken){
-  const bot=new Bot(botToken);
+const express = require('express');
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
-  bot.command('start',async (ctx)=>{
-    try{
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+const botToken = process.env.TELEGRAM_BOT_TOKEN;
+const publicAppUrl = String(process.env.PUBLIC_APP_URL || '').trim();
+
+const TREASURY_ADDRESS = String(process.env.TREASURY_ADDRESS || '').trim();
+const TONCENTER_API_KEY = String((() => {
+  try {
+    return fs.readFileSync(path.join(__dirname, '.toncenter-key'), 'utf8').trim();
+  } catch {
+    return process.env.TONCENTER_API_KEY || '';
+  }
+})()).trim();
+
+const DATA_DIR = path.join(__dirname, 'data');
+const PURCHASES_FILE = path.join(DATA_DIR, 'purchases.json');
+
+fs.mkdirSync(DATA_DIR, { recursive: true });
+
+function readPurchases() {
+  try {
+    if (!fs.existsSync(PURCHASES_FILE)) return [];
+    const data = JSON.parse(fs.readFileSync(PURCHASES_FILE, 'utf8'));
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+function writePurchases(data) {
+  fs.writeFileSync(
+    PURCHASES_FILE,
+    JSON.stringify(data, null, 2),
+    { mode: 0o600 }
+  );
+}
+
+const TICKETS = {
+  Bronze: { price: 1, chances: 1 },
+  Silver: { price: 3, chances: 5 },
+  Purple: { price: 7, chances: 10 },
+  Ice: { price: 9, chances: 15 },
+  Golden: { price: 11, chances: 20 }
+};
+
+const round = {
+  id: 1,
+  targetTon: 20000,
+  maxPerUserTon: 11,
+  minPerEntryTon: 1,
+  winners: 1000,
+  status: 'OPEN',
+  totalConfirmedTon: 0
+};
+
+app.use(express.json({ limit: '1mb' }));
+app.use(express.static(path.join(__dirname, '..', 'web')));
+
+function normalizeAddress(value) {
+  try {
+    return Address.parse(String(value).trim()).toRawString().toLowerCase();
+  } catch {
+    return String(value || '').trim().toLowerCase();
+  }
+}
+
+function validateInitData(initData) {
+  if (!initData || !botToken) {
+    return {
+      ok: false,
+      error: 'Telegram validation is not configured'
+    };
+  }
+
+  const p = new URLSearchParams(initData);
+  const hash = p.get('hash');
+  const authDate = Number(p.get('auth_date') || 0);
+
+  if (!hash || !/^[a-f0-9]{64}$/i.test(hash)) {
+    return {
+      ok: false,
+      error: 'Invalid Telegram hash'
+    };
+  }
+
+  if (!authDate) {
+    return {
+      ok: false,
+      error: 'Missing auth_date'
+    };
+  }
+
+  const age = Math.floor(Date.now() / 1000) - authDate;
+
+  if (age < -60 || age > 3600) {
+    return {
+      ok: false,
+      error: 'Telegram session expired'
+    };
+  }
+
+  p.delete('hash');
+
+  const dataCheck = [...p.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}=${v}`)
+    .join('\n');
+
+  const secret = crypto
+    .createHmac('sha256', 'WebAppData')
+    .update(botToken)
+    .digest();
+
+  const calc = crypto
+    .createHmac('sha256', secret)
+    .update(dataCheck)
+    .digest('hex');
+
+  const valid =
+    calc.length === hash.length &&
+    crypto.timingSafeEqual(
+      Buffer.from(calc, 'utf8'),
+      Buffer.from(hash, 'utf8')
+    );
+
+  return {
+    ok: valid,
+    error: valid ? undefined : 'Invalid Telegram session',
+    data: p
+  };
+}
+
+function getTelegramUser(initData) {
+  const session = validateInitData(initData);
+
+  if (!session.ok) {
+    return {
+      ok: false,
+      error: session.error
+    };
+  }
+
+  let user = null;
+
+  try {
+    user = JSON.parse(session.data.get('user') || 'null');
+  } catch {}
+
+  if (!user?.id) {
+    return {
+      ok: false,
+      error: 'Telegram user not found'
+    };
+  }
+
+  return {
+    ok: true,
+    user
+  };
+}
+
+function ticketFromName(type) {
+  return TICKETS[String(type || '')] || null;
+}
+
+async function toncenter(pathname, params = {}) {
+  if (!TONCENTER_API_KEY) {
+    throw new Error('TONCENTER_API_KEY is not configured');
+  }
+
+  const url = new URL(
+    `https://toncenter.com/api/v3${pathname}`
+  );
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') {
+      url.searchParams.set(key, String(value));
+    }
+  }
+
+  const response = await fetch(url, {
+    headers: {
+      'X-API-Key': TONCENTER_API_KEY
+    }
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data?.error || data?.message || `TON Center HTTP ${response.status}`
+    );
+  }
+
+  return data;
+}
+
+async function findConfirmedPayment(intent) {
+  if (!TREASURY_ADDRESS) {
+    throw new Error('TREASURY_ADDRESS is not configured');
+  }
+
+  const expectedNano = BigInt(
+    Math.round(intent.price * 1000000000)
+  );
+
+  const sender = normalizeAddress(intent.walletAddress);
+  const treasury = normalizeAddress(TREASURY_ADDRESS);
+
+  const start = Math.floor(intent.createdAt / 1000) - 30;
+  const end = Math.floor(Date.now() / 1000) + 30;
+
+  const data = await toncenter('/messages', {
+    destination: treasury,
+    direction: 'in',
+    start_utime: start,
+    end_utime: end,
+    limit: 100,
+    offset: 0
+  });
+
+  const messages = Array.isArray(data?.messages)
+    ? data.messages
+    : [];
+
+  for (const message of messages) {
+    if (message?.bounced === true) {
+      continue;
+    }
+
+    const destination = normalizeAddress(message?.destination);
+    const source = normalizeAddress(message?.source);
+
+    if (destination !== treasury) continue;
+    if (source !== sender) continue;
+
+    let value;
+
+    try {
+      value = BigInt(String(message?.value || '0'));
+    } catch {
+      continue;
+    }
+
+    if (value !== expectedNano) continue;
+
+    return {
+      found: true,
+      txHash:
+        message?.in_msg_tx_hash ||
+        message?.out_msg_tx_hash ||
+        message?.hash ||
+        null,
+      messageHash: message?.hash || null,
+      source: message?.source || intent.walletAddress,
+      destination: message?.destination || TREASURY_ADDRESS,
+      valueNano: value.toString(),
+      createdAt: Number(message?.created_at || 0)
+    };
+  }
+
+  return {
+    found: false
+  };
+}
+
+function buildLeaderboard() {
+  const purchases = readPurchases()
+    .filter(x =>
+      x &&
+      x.status === 'confirmed' &&
+      x.userId
+    );
+
+  const users = new Map();
+
+  for (const purchase of purchases) {
+    const key = String(purchase.userId);
+
+    if (!users.has(key)) {
+      users.set(key, {
+        userId: key,
+        firstName: purchase.firstName || '',
+        lastName: purchase.lastName || '',
+        username: purchase.username || '',
+        photoUrl: purchase.photoUrl || '',
+        totalChances: 0,
+        totalTon: 0,
+        tickets: [],
+        purchases: 0
+      });
+    }
+
+    const user = users.get(key);
+
+    if (purchase.firstName) user.firstName = purchase.firstName;
+    if (purchase.lastName) user.lastName = purchase.lastName;
+    if (purchase.username) user.username = purchase.username;
+    if (purchase.photoUrl) user.photoUrl = purchase.photoUrl;
+
+    user.totalChances += Number(purchase.chances || 0);
+    user.totalTon += Number(purchase.price || 0);
+    user.purchases += 1;
+
+    user.tickets.push({
+      type: purchase.type,
+      chances: Number(purchase.chances || 0),
+      price: Number(purchase.price || 0),
+      confirmedAt: purchase.confirmedAt
+    });
+  }
+
+  return [...users.values()]
+    .sort((a, b) => {
+      if (b.totalChances !== a.totalChances) {
+        return b.totalChances - a.totalChances;
+      }
+
+      if (b.totalTon !== a.totalTon) {
+        return b.totalTon - a.totalTon;
+      }
+
+      return String(a.userId).localeCompare(String(b.userId));
+    })
+    .map((user, index) => ({
+      rank: index + 1,
+      ...user,
+      totalTon: Number(user.totalTon.toFixed(3))
+    }));
+}
+
+function updateRoundTotal() {
+  const purchases = readPurchases()
+    .filter(x => x?.status === 'confirmed');
+
+  round.totalConfirmedTon = Number(
+    purchases
+      .reduce((sum, x) => sum + Number(x.price || 0), 0)
+      .toFixed(3)
+  );
+}
+
+if (botToken) {
+  const bot = new Bot(botToken);
+
+  bot.command('start', async ctx => {
+    try {
       await ctx.reply(
-        '🎯 Welcome to TON Lottery!\\n\\nTap the button below to open the Mini App.',
+        '🎯 Welcome to TON Lottery!\n\nTap the button below to open the Mini App.',
         {
-          reply_markup:{
-            inline_keyboard:[
+          reply_markup: {
+            inline_keyboard: [
               [
                 {
-                  text:'🎯 Open App',
-                  web_app:{url:publicAppUrl}
+                  text: '🎯 Open App',
+                  web_app: { url: publicAppUrl }
                 }
               ]
             ]
           }
         }
       );
-    }catch(error){
-      console.error('[bot] /start failed:',error.message);
+    } catch (error) {
+      console.error('[bot] /start failed:', error.message);
     }
   });
 
-  if(publicAppUrl){
+  if (publicAppUrl) {
     bot.api.setChatMenuButton({
-      menu_button:{
-        type:'web_app',
-        text:'🎯 Open App',
-        web_app:{url:publicAppUrl}
+      menu_button: {
+        type: 'web_app',
+        text: '🎯 Open App',
+        web_app: { url: publicAppUrl }
       }
-    }).then(()=>{
-      console.log('[bot] Menu Button configured');
-    }).catch(error=>{
-      console.error('[bot] Menu Button setup failed:',error.message);
-    });
-  }else{
-    console.warn('[bot] PUBLIC_APP_URL is missing');
+    })
+      .then(() => console.log('[bot] Menu Button configured'))
+      .catch(error =>
+        console.error('[bot] Menu Button setup failed:', error.message)
+      );
   }
 
-  bot.catch((error)=>{
-    console.error('[bot] handler error:',error.message);
-  });
+  bot.catch(error =>
+    console.error('[bot] handler error:', error.message)
+  );
 
-  bot.startPolling().then(()=>{
-    console.log('[bot] Telegram bot started');
-  }).catch(error=>{
-    console.error('[bot] polling start failed:',error.message);
-  });
-}else{
+  bot.startPolling()
+    .then(() => console.log('[bot] Telegram bot started'))
+    .catch(error =>
+      console.error('[bot] polling start failed:', error.message)
+    );
+} else {
   console.warn('[bot] TELEGRAM_BOT_TOKEN is missing; bot disabled');
 }
 
-const PORT=process.env.PORT||3000;
-app.use(express.json());
-app.use(express.static(path.join(__dirname,'..','web')));
-
-const round={id:1,targetTon:20000,maxPerUserTon:11,minPerEntryTon:1,winners:1000,status:'OPEN',totalConfirmedTon:0};
-function validateInitData(initData){
-  if(!initData||!process.env.TELEGRAM_BOT_TOKEN) return {ok:false,error:'Telegram validation is not configured'};
-  const p=new URLSearchParams(initData); const hash=p.get('hash'); if(!hash) return {ok:false,error:'Missing hash'};
-  p.delete('hash'); const dataCheck=[...p.entries()].sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>`${k}=${v}`).join('\n');
-  const secret=crypto.createHmac('sha256','WebAppData').update(process.env.TELEGRAM_BOT_TOKEN).digest();
-  const calc=crypto.createHmac('sha256',secret).update(dataCheck).digest('hex');
-  return {ok:crypto.timingSafeEqual(Buffer.from(calc),Buffer.from(hash)),data:p};
-}
-async function updateRoundProgress(){
-  try{
-    const treasury=String(process.env.TREASURY_ADDRESS||'').trim();
-    if(!treasury) return;
-
-    const apiKey=process.env.TONCENTER_API_KEY || '';
-    const headers=apiKey ? {'X-API-Key':apiKey} : {};
-
-    const fourMonthsAgo =
-      Math.floor(Date.now()/1000) - (120 * 24 * 60 * 60);
-
-    let offset=0;
-    const limit=1000;
-    let totalNano=0n;
-    let pages=0;
-
-    while(pages<20){
-      const url=
-        'https://toncenter.com/api/v3/transactions?account='+
-        encodeURIComponent(treasury)+
-        '&start_utime='+fourMonthsAgo+
-        '&limit='+limit+
-        '&offset='+offset+
-        '&sort=desc';
-
-      const response=await fetch(url,{headers});
-      if(!response.ok) break;
-
-      const data=await response.json();
-      const transactions=
-        Array.isArray(data?.transactions)
-          ? data.transactions
-          : [];
-
-      if(!transactions.length) break;
-
-      for(const tx of transactions){
-        const msg=tx?.in_msg;
-        if(!msg) continue;
-
-        const value=BigInt(String(msg.value||'0'));
-        if(value<=0n) continue;
-
-        if(msg.bounced===true) continue;
-
-        totalNano+=value;
-      }
-
-      pages++;
-
-      if(transactions.length<limit) break;
-      offset+=limit;
-    }
-
-    round.totalConfirmedTon=
-      Number(totalNano)/1000000000;
-
-    console.log(
-      '[progress] confirmed:',
-      round.totalConfirmedTon,
-      'TON | since:',
-      new Date(fourMonthsAgo*1000).toISOString(),
-      '| pages:',
-      pages
-    );
-
-  }catch(error){
-    console.error(
-      '[progress] blockchain check failed:',
-      error.message
-    );
-  }
-}
-
-app.get('/api/config',async (req,res)=>{
-  await updateRoundProgress();
+app.get('/api/config', (req, res) => {
+  updateRoundTotal();
 
   res.json({
     round,
-    publicAppUrl:process.env.PUBLIC_APP_URL||null,
-    treasuryAddress:process.env.TREASURY_ADDRESS||null,
-    realPaymentEnabled:true
+    publicAppUrl: process.env.PUBLIC_APP_URL || null,
+    treasuryAddress: TREASURY_ADDRESS || null,
+    realPaymentEnabled: Boolean(TREASURY_ADDRESS)
   });
 });
-app.post('/api/telegram/session',(req,res)=>{const r=validateInitData(req.body?.initData); if(!r.ok)return res.status(401).json(r); let user=null; try{user=JSON.parse(r.data.get('user')||'null')}catch{} res.json({ok:true,user});});
-app.post('/api/channel/status',async (req,res)=>{
+
+app.post('/api/telegram/session', (req, res) => {
+  const result = getTelegramUser(req.body?.initData);
+
+  if (!result.ok) {
+    return res.status(401).json(result);
+  }
+
+  res.json({
+    ok: true,
+    user: result.user
+  });
+});
+
+app.get('/api/leaderboard', (req, res) => {
+  updateRoundTotal();
+
+  res.json({
+    ok: true,
+    round,
+    leaderboard: buildLeaderboard()
+  });
+});
+
+app.post('/api/payment/intent', (req, res) => {
   try {
-    if(!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHANNEL){
-      return res.status(503).json({
-        ok:false,
-        error:'Channel membership check is not configured'
-      });
+    const session = getTelegramUser(req.body?.initData);
+
+    if (!session.ok) {
+      return res.status(401).json(session);
     }
 
-    const session=validateInitData(req.body?.initData);
+    const ticket = ticketFromName(req.body?.type);
 
-    if(!session.ok){
-      return res.status(401).json({
-        ok:false,
-        error:'Invalid Telegram session'
-      });
-    }
-
-    let user=null;
-    try {
-      user=JSON.parse(session.data.get('user')||'null');
-    } catch {}
-
-    if(!user?.id){
+    if (!ticket) {
       return res.status(400).json({
-        ok:false,
-        error:'Telegram user not found'
+        ok: false,
+        error: 'Invalid ticket type'
       });
     }
 
-    const channel=process.env.TELEGRAM_CHANNEL.trim();
+    const walletAddress = String(
+      req.body?.walletAddress || ''
+    ).trim();
 
-    const url=
-      `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`+
-      `/getChatMember?chat_id=${encodeURIComponent(channel)}`+
-      `&user_id=${encodeURIComponent(String(user.id))}`;
-
-    console.log('[membership] checking user:',String(user.id));
-    console.log('[membership] channel:',channel);
-
-    const telegramResponse=await fetch(url);
-    const data=await telegramResponse.json();
-
-    console.log('[membership] Telegram response:',JSON.stringify(data));
-
-    if(!data.ok){
-      return res.status(502).json({
-        ok:false,
-        error:data.description||'Telegram API error',
-        telegramErrorCode:data.error_code||null
+    if (!walletAddress) {
+      return res.status(400).json({
+        ok: false,
+        error: 'Wallet address is required'
       });
     }
 
-    const member=data.result||{};
-    const status=member.status;
+    try {
+      Address.parse(walletAddress);
+    } catch {
+      return res.status(400).json({
+        ok: false,
+        error: 'Invalid TON wallet address'
+      });
+    }
 
-    const joined=
-      status==='creator' ||
-      status==='administrator' ||
-      status==='member' ||
-      (status==='restricted' && member.is_member===true);
+    const purchases = readPurchases();
 
-    console.log('[membership] status:',status,'joined:',joined);
+    const intent = {
+      id: crypto.randomUUID(),
+      status: 'pending',
+      roundId: round.id,
+      userId: String(session.user.id),
+      firstName: session.user.first_name || '',
+      lastName: session.user.last_name || '',
+      username: session.user.username || '',
+      photoUrl: session.user.photo_url || '',
+      walletAddress,
+      type: req.body.type,
+      price: ticket.price,
+      chances: ticket.chances,
+      createdAt: Date.now(),
+      confirmedAt: null,
+      txHash: null
+    };
+
+    purchases.push(intent);
+    writePurchases(purchases);
 
     res.json({
-      ok:true,
-      joined,
-      status,
-      debug:{
-        channel,
-        telegramStatus:status
-      }
+      ok: true,
+      intentId: intent.id,
+      price: ticket.price,
+      chances: ticket.chances
     });
-
-  } catch(e) {
-    console.error('[membership] error:',e);
+  } catch (error) {
+    console.error('[payment/intent]', error);
 
     res.status(500).json({
-      ok:false,
-      error:e.message||'Membership check failed'
+      ok: false,
+      error: error.message || 'Payment intent failed'
     });
   }
 });
 
-app.post('/api/payment/verify',async (req,res)=>{
-  try{
-    await updateRoundProgress();
+app.post('/api/payment/verify', async (req, res) => {
+  try {
+    const session = getTelegramUser(req.body?.initData);
+
+    if (!session.ok) {
+      return res.status(401).json(session);
+    }
+
+    const intentId = String(req.body?.intentId || '');
+
+    if (!intentId) {
+      return res.status(400).json({
+        ok: false,
+        error: 'Missing payment intent'
+      });
+    }
+
+    const purchases = readPurchases();
+
+    const index = purchases.findIndex(
+      x =>
+        x?.id === intentId &&
+        String(x.userId) === String(session.user.id)
+    );
+
+    if (index === -1) {
+      return res.status(404).json({
+        ok: false,
+        error: 'Payment intent not found'
+      });
+    }
+
+    const intent = purchases[index];
+
+    if (intent.status === 'confirmed') {
+      updateRoundTotal();
+
+      return res.json({
+        ok: true,
+        confirmed: true,
+        purchase: intent,
+        round,
+        leaderboard: buildLeaderboard()
+      });
+    }
+
+    const result = await findConfirmedPayment(intent);
+
+    if (!result.found) {
+      return res.json({
+        ok: true,
+        confirmed: false,
+        message: 'Payment is not confirmed on-chain yet.'
+      });
+    }
+
+    purchases[index] = {
+      ...intent,
+      status: 'confirmed',
+      confirmedAt: Date.now(),
+      txHash: result.txHash,
+      messageHash: result.messageHash
+    };
+
+    writePurchases(purchases);
+    updateRoundTotal();
 
     res.json({
-      ok:true,
+      ok: true,
+      confirmed: true,
+      purchase: purchases[index],
       round,
-      totalConfirmedTon:round.totalConfirmedTon
+      leaderboard: buildLeaderboard()
     });
-  }catch(error){
+  } catch (error) {
+    console.error('[payment/verify]', error);
+
     res.status(500).json({
-      ok:false,
-      error:error.message||'Payment verification failed'
+      ok: false,
+      error: error.message || 'Payment verification failed'
     });
   }
 });
-app.get('/*splat',(req,res)=>res.sendFile(path.join(__dirname,'..','web','index.html')));
-app.listen(PORT,()=>console.log(`Mini App shell running on http://127.0.0.1:${PORT}`));
+
+app.post('/api/channel/status', async (req, res) => {
+  try {
+    if (!botToken || !process.env.TELEGRAM_CHANNEL) {
+      return res.status(503).json({
+        ok: false,
+        error: 'Channel membership check is not configured'
+      });
+    }
+
+    const session = getTelegramUser(req.body?.initData);
+
+    if (!session.ok) {
+      return res.status(401).json(session);
+    }
+
+    const channel = process.env.TELEGRAM_CHANNEL.trim();
+
+    const url =
+      `https://api.telegram.org/bot${botToken}` +
+      `/getChatMember?chat_id=${encodeURIComponent(channel)}` +
+      `&user_id=${encodeURIComponent(String(session.user.id))}`;
+
+    const telegramResponse = await fetch(url);
+    const data = await telegramResponse.json();
+
+    if (!data.ok) {
+      return res.status(502).json({
+        ok: false,
+        error: data.description || 'Telegram API error'
+      });
+    }
+
+    const member = data.result || {};
+    const status = member.status;
+
+    const joined =
+      status === 'creator' ||
+      status === 'administrator' ||
+      status === 'member' ||
+      (status === 'restricted' && member.is_member === true);
+
+    res.json({
+      ok: true,
+      joined,
+      status
+    });
+  } catch (error) {
+    console.error('[membership]', error);
+
+    res.status(500).json({
+      ok: false,
+      error: error.message || 'Membership check failed'
+    });
+  }
+});
+
+app.get('/*splat', (req, res) => {
+  res.sendFile(
+    path.join(__dirname, '..', 'web', 'index.html')
+  );
+});
+
+app.listen(PORT, () => {
+  console.log(
+    `Mini App shell running on http://127.0.0.1:${PORT}`
+  );
+});
