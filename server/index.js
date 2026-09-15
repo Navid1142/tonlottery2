@@ -426,6 +426,51 @@ app.post('/api/telegram/session', (req, res) => {
   });
 });
 
+
+app.get('/api/my-tickets', (req, res) => {
+  try {
+    const session = getTelegramUser(req.query?.initData);
+
+    if (!session.ok) {
+      return res.status(401).json(session);
+    }
+
+    const userId = String(session.user.id);
+
+    const tickets = readPurchases()
+      .filter(x =>
+        x &&
+        x.status === 'confirmed' &&
+        String(x.userId) === userId &&
+        Number(x.roundId) === Number(round.id)
+      )
+      .sort((a, b) =>
+        Number(b.confirmedAt || 0) - Number(a.confirmedAt || 0)
+      )
+      .map(x => ({
+        id: x.id,
+        type: x.type,
+        price: Number(x.price || 0),
+        chances: Number(x.chances || 0),
+        confirmedAt: x.confirmedAt || null,
+        txHash: x.txHash || null
+      }));
+
+    res.json({
+      ok: true,
+      round,
+      tickets
+    });
+  } catch (error) {
+    console.error('[my-tickets]', error);
+
+    res.status(500).json({
+      ok: false,
+      error: error.message || 'Could not load tickets'
+    });
+  }
+});
+
 app.get('/api/leaderboard', (req, res) => {
   updateRoundTotal();
 
