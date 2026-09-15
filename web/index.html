@@ -563,7 +563,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:10p
     }finally{
       $('payBtn').disabled=false;
     }
-  });console.log('TON Connect response',result);const list=JSON.parse(localStorage.getItem('tonLotteryTickets')||'[]');list.unshift({type:selected.type,price:selected.price,chances:selected.chances,time:new Date().toISOString()});localStorage.setItem('tonLotteryTickets',JSON.stringify(list.slice(0,50)));renderTickets();setStatus('Transaction submitted. On-chain confirmation is pending.')}catch(e){setStatus(e?.message||'Transaction cancelled or failed.')}finally{$('payBtn').disabled=false}});
+});
 })();
 </script>
 </body></html>
