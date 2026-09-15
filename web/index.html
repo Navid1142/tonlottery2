@@ -676,11 +676,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:10p
 });
 
 
-  try{
-    await initTelegram();
-  }catch(e){
-    console.error('Telegram initialization error',e);
-  }
+  // Telegram initialization is started without blocking the UI.
+  setTimeout(() => {
+    initTelegram().catch(e => {
+      console.error('Telegram initialization error', e);
+    });
+  }, 0);
 
 })();
 </script>
