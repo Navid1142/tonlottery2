@@ -206,6 +206,13 @@ async function toncenter(pathname, params = {}) {
 }
 
 async function findConfirmedPayment(intent, boc = '') {
+  console.log(
+    '[payment/verify] BoC received:',
+    Boolean(boc),
+    'length:',
+    boc ? boc.length : 0
+  );
+
   if (!TREASURY_ADDRESS) {
     throw new Error('TREASURY_ADDRESS is not configured');
   }
