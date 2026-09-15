@@ -460,21 +460,55 @@ header{display:flex;align-items:center;justify-content:space-between;padding:10p
         throw new Error('Treasury address is not configured.');
       }
 
+      const priceTon=Number(selected.price);
+
+      if(![1,3,7,9,11].includes(priceTon)){
+        throw new Error('Invalid ticket price: '+priceTon+' TON');
+      }
+
       const nano=String(
-        Math.round(selected.price*1000000000)
+        Math.round(priceTon*1000000000)
       );
 
-      $('payBtn').disabled=true;
-      setStatus('Confirm the selected ticket in your wallet.');
-
-      await tonUI.sendTransaction({
-        validUntil:Math.floor(Date.now()/1000)+300,
-        network:'-239',
-        messages:[{
-          address:treasury,
-          amount:nano
-        }]
+      console.log('TON PAYMENT REQUEST',{
+        ticket:selected.type,
+        priceTon,
+        nano,
+        treasury,
+        network:'-239'
       });
+
+      $('payBtn').disabled=true;
+      setStatus(
+        'Confirm '+selected.type+' payment of '+priceTon+' TON in your wallet.'
+      );
+
+      let txResult;
+
+      try{
+        txResult=await tonUI.sendTransaction({
+          validUntil:Math.floor(Date.now()/1000)+300,
+          network:'-239',
+          messages:[{
+            address:treasury,
+            amount:nano
+          }]
+        });
+
+        console.log('TON TRANSACTION RESULT',txResult);
+
+      }catch(walletError){
+        console.error('TON SEND ERROR',walletError);
+
+        const message=
+          walletError?.message||
+          walletError?.data?.message||
+          String(walletError);
+
+        throw new Error(
+          'TON payment failed: '+message
+        );
+      }
 
       setStatus('Transaction sent. Waiting for on-chain confirmation...');
 
