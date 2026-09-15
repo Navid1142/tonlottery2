@@ -312,6 +312,27 @@ async function findConfirmedPayment(intent, boc = '') {
   };
 }
 
+
+function makeTonCommentPayload(text) {
+  const bytes = Buffer.from(String(text), 'utf8');
+
+  if (bytes.length > 120) {
+    throw new Error('Payment comment is too long');
+  }
+
+  // Cell body:
+  // 32-bit zero opcode + UTF-8 comment bytes.
+  //
+  // We use a tiny handcrafted BoC containing one ordinary cell.
+  const data = Buffer.alloc(4 + bytes.length);
+  data.writeUInt32BE(0, 0);
+  bytes.copy(data, 4);
+
+  // This helper intentionally returns null until the frontend
+  // uses a wallet-compatible BoC builder.
+  return null;
+}
+
 function buildLeaderboard() {
   const purchases = readPurchases()
     .filter(x =>
@@ -585,7 +606,8 @@ app.post('/api/payment/intent', (req, res) => {
       intentId: intent.id,
       price: ticket.price,
       chances: ticket.chances,
-      paymentComment: intent.paymentComment
+      paymentComment: intent.paymentComment,
+      paymentPayload: makeTonCommentPayload(intent.paymentComment)
     });
   } catch (error) {
     console.error('[payment/intent]', error);
