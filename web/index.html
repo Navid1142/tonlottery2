@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script src="https://telegram.org/js/telegram-web-app.js?63"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#030305">
@@ -44,6 +45,156 @@ header{display:flex;align-items:center;justify-content:space-between;padding:10p
 .settings-panel{overflow:hidden}.settings-row b{font-weight:800}.robot-info{margin-top:16px;padding:16px;border:1px solid rgba(255,23,77,.25);border-radius:18px;background:linear-gradient(135deg,rgba(255,23,77,.10),rgba(35,217,255,.06));box-shadow:inset 0 1px rgba(255,255,255,.06)}.robot-info-title{font-size:12px;font-weight:1000;letter-spacing:.12em;color:#fff;text-shadow:0 0 12px rgba(255,23,77,.55)}.robot-info p{margin:9px 0 0;color:#aeb6c8;font-size:10px;line-height:1.65}.lang{cursor:pointer}.lang:active{transform:scale(.96)}.ticket.selected .ticket-buy{background:rgba(255,255,255,.10)}
 @media(max-width:720px){.shell{width:94vw}.hero-grid{grid-template-columns:1fr}.ring{width:165px;height:165px}.ring:before{width:135px;height:135px}.tickets{grid-template-columns:repeat(2,1fr)}.ticket.golden{grid-column:1/-1}.ticket.golden .ticket-icon{height:80px}.jack{position:static;text-align:left;margin-top:12px}.hero{min-height:0}.pay{grid-template-columns:1fr}.pay-btn{width:100%}}
 @media(max-width:380px){.tickets{grid-template-columns:1fr 1fr}.ticket-icon{height:58px}.ticket-shape{width:52px;height:37px}}
+
+.leaderboard{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:10px;
+}
+.leader-row{
+  display:grid;
+  grid-template-columns:30px 46px 1fr auto;
+  align-items:center;
+  gap:9px;
+  padding:10px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:14px;
+  background:rgba(255,255,255,.025);
+}
+.leader-rank{
+  font-weight:800;
+  text-align:center;
+  font-size:12px;
+}
+.leader-photo{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.06);
+}
+.leader-photo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.leader-avatar{
+  font-size:20px;
+}
+.leader-main{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.leader-main strong{
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.leader-main span{
+  font-size:9px;
+  opacity:.65;
+}
+.leader-main small{
+  font-size:8px;
+  opacity:.5;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.leader-score{
+  text-align:right;
+  display:flex;
+  flex-direction:column;
+}
+.leader-score b{
+  font-size:17px;
+}
+.leader-score span{
+  font-size:7px;
+  opacity:.55;
+  text-transform:uppercase;
+}
+
+
+.cup-ticket{
+  display:inline-block;
+  margin:4px 5px 0 0;
+  padding:4px 8px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:999px;
+  font-size:11px;
+  color:#ddd;
+  background:rgba(255,255,255,.035);
+}
+
+.leader-name{
+  font-weight:700;
+  font-size:15px;
+  color:#fff;
+  line-height:1.25;
+}
+
+.leader-username{
+  margin-top:2px;
+  font-size:12px;
+  color:#aaa;
+}
+
+.leader-id{
+  margin-top:3px;
+  font-size:10px;
+  color:#666;
+  word-break:break-all;
+}
+
+.leader-tickets{
+  margin-top:5px;
+}
+
+.leader-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:7px;
+  font-size:10px;
+  color:#999;
+}
+
+.leader-score{
+  min-width:58px;
+  text-align:right;
+}
+
+.leader-score strong{
+  display:block;
+  font-size:19px;
+  line-height:1;
+  color:#fff;
+}
+
+.leader-score small{
+  display:block;
+  margin-top:4px;
+  font-size:8px;
+  color:#777;
+  letter-spacing:.08em;
+}
+
+.leader-photo-fallback{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.06);
+  font-size:20px;
+}
+
 </style>
 </head>
 <body>
@@ -64,7 +215,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:10p
 </section>
 
 <section id="ticketsView" class="view"><div class="glass section"><div class="section-title"><strong data-i18n="myTicketsTitle">MY TICKETS</strong><small data-i18n="myTicketsSub">Tickets stored after successful submission</small></div><div id="myTickets" class="empty">No tickets yet.</div></div></section>
-<section id="resultsView" class="view"><div class="glass result-card"><div class="trophy">🏆</div><h2 data-i18n="resultsTitle">RESULTS</h2><p class="empty" data-i18n="resultsText">Results will appear here when the round closes.</p></div></section>
+<section id="resultsView" class="view"><div class="glass result-card"><div class="trophy">🏆</div><h2 data-i18n="resultsTitle">RESULTS</h2><p class="empty" data-i18n="resultsText">Top confirmed players ranked by total chances.</p></div></section>
 <section id="settingsView" class="view"><div class="glass section settings-panel"><div class="section-title"><strong data-i18n="settingsTitle">SETTINGS</strong><small data-i18n="settingsSub">Lottery control center</small></div><div class="settings-row"><span>🌐 <b data-i18n="network">Network</b></span><small>TON Mainnet</small></div><div class="settings-row"><span>🎟️ <b data-i18n="round">Round</b></span><small>#1 • 20,000 TON</small></div><div class="settings-row"><span>💎 <b data-i18n="ticketLimits">Ticket limits</b></span><small>1 / 3 / 7 / 9 / 11 TON</small></div><div class="settings-row"><span>👛 <b data-i18n="wallet">Wallet</b></span><small id="settingsWallet">Not connected</small></div><div class="settings-row"><span>📡 <b data-i18n="paymentStatus">Payment status</b></span><small id="settingsPayment">Wallet confirmation required</small></div><div class="settings-row"><span>✨ <b data-i18n="motion">Motion effects</b></span><small>ON</small></div><div class="settings-row"><span>🔴 <b data-i18n="robotMode">Robot mode</b></span><small>ACTIVE</small></div><div class="settings-row"><span>🛡️ <b data-i18n="security">Transaction security</b></span><small data-i18n="walletConfirm">Wallet confirmation</small></div><div class="settings-row"><span>📣 <b data-i18n="telegram">Telegram access</b></span><small>Mini App</small></div><div class="settings-row"><span>🎨 <b data-i18n="interface">Interface</b></span><small>Glass Cyber V4</small></div><div class="robot-info"><div class="robot-info-title">🤖 <span data-i18n="robotTitle">CYBER GUARDIAN</span></div><p data-i18n="robotText">The robot is the visual guardian of the lottery. It monitors the live interface, shows lottery progress, reacts with eye-beam effects every 10 seconds, and keeps the cyber environment active. It does not control your wallet and cannot approve a payment for you. Every TON payment must be reviewed and confirmed by your connected wallet.</p></div></div></section>
 
 <nav class="glass nav"><button class="active" data-view="home"><span>⌂</span><small data-i18n="navHome">HOME</small></button><button data-view="ticketsView"><span>♢</span><small data-i18n="navTickets">MY TICKETS</small></button><button data-view="resultsView"><span>♜</span><small data-i18n="navResults">RESULTS</small></button><button data-view="settingsView"><span>⚙</span><small data-i18n="navSettings">SETTINGS</small></button></nav>
@@ -83,16 +234,336 @@ header{display:flex;align-items:center;justify-content:space-between;padding:10p
   renderTickets();
   async function loadConfig(){try{const r=await fetch('/api/config');const d=await r.json();const total=Number(d?.round?.totalConfirmedTon||0),target=Number(d?.round?.targetTon||20000);const pct=Math.min(100,total/target*100);$('percent').textContent=(pct<.01?pct.toFixed(3):pct<1?pct.toFixed(2):pct.toFixed(1))+'%';$('ring').style.setProperty('--p',(pct*3.6)+'deg')}catch{}}
   loadConfig();setInterval(loadConfig,15000);
-  const i18n={fa:{eyebrow:'قرعه‌کشی بزرگ • دور #۱',heroText:'تکت خود را انتخاب کنید و وارد قرعه‌کشی سایبری شوید.',chooseTicket:'انتخاب تکت',moreChances:'شانس بیشتر = احتمال بیشتر',payButton:'✦ پرداخت با TON',myTicketsTitle:'تکت‌های من',myTicketsSub:'تکت‌ها پس از ارسال موفق ذخیره می‌شوند',resultsTitle:'نتایج',resultsText:'نتایج پس از بسته‌شدن دور نمایش داده می‌شوند',settingsTitle:'تنظیمات',settingsSub:'مرکز کنترل قرعه‌کشی',network:'شبکه',round:'دور',ticketLimits:'محدودیت تکت',wallet:'کیف پول',paymentStatus:'وضعیت پرداخت',motion:'افکت‌های حرکتی',robotMode:'حالت ربات',security:'امنیت تراکنش',walletConfirm:'تأیید کیف پول',telegram:'دسترسی تلگرام',interface:'رابط کاربری',robotTitle:'نگهبان سایبری',robotText:'ربات نگهبان تصویری قرعه‌کشی است. وضعیت رابط، پیشرفت زنده قرعه‌کشی و افکت‌های سایبری را پایش می‌کند و هر ۱۰ ثانیه با نور چشم واکنش نشان می‌دهد. ربات به کیف پول شما دسترسی ندارد و نمی‌تواند پرداخت را به‌جای شما تأیید کند؛ هر پرداخت TON باید توسط کیف پول متصل شما بررسی و تأیید شود.',navHome:'خانه',navTickets:'تکت‌های من',navResults:'نتایج',navSettings:'تنظیمات'},en:{eyebrow:'GRAND LOTTERY • ROUND #1',heroText:'Choose your ticket. Enter the cyber lottery.',chooseTicket:'Choose Your Ticket',moreChances:'More chances = stronger odds',payButton:'✦ PAY WITH TON',myTicketsTitle:'MY TICKETS',myTicketsSub:'Tickets stored after successful submission',resultsTitle:'RESULTS',resultsText:'Results will appear here when the round closes',settingsTitle:'SETTINGS',settingsSub:'Lottery control center',network:'Network',round:'Round',ticketLimits:'Ticket limits',wallet:'Wallet',paymentStatus:'Payment status',motion:'Motion effects',robotMode:'Robot mode',security:'Transaction security',walletConfirm:'Wallet confirmation',telegram:'Telegram access',interface:'Interface',robotTitle:'CYBER GUARDIAN',robotText:'The robot is the visual guardian of the lottery. It monitors the live interface, shows lottery progress, reacts with eye-beam effects every 10 seconds, and keeps the cyber environment active. It does not control your wallet and cannot approve a payment for you. Every TON payment must be reviewed and confirmed by your connected wallet.',navHome:'HOME',navTickets:'MY TICKETS',navResults:'RESULTS',navSettings:'SETTINGS'},ru:{eyebrow:'БОЛЬШАЯ ЛОТЕРЕЯ • РАУНД №1',heroText:'Выберите билет и войдите в кибер-лотерею.',chooseTicket:'Выберите билет',moreChances:'Больше шансов = выше вероятность',payButton:'✦ ОПЛАТИТЬ TON',myTicketsTitle:'МОИ БИЛЕТЫ',myTicketsSub:'Билеты сохраняются после успешной отправки',resultsTitle:'РЕЗУЛЬТАТЫ',resultsText:'Результаты появятся после закрытия раунда',settingsTitle:'НАСТРОЙКИ',settingsSub:'Центр управления лотереей',network:'Сеть',round:'Раунд',ticketLimits:'Лимиты билетов',wallet:'Кошелёк',paymentStatus:'Статус платежа',motion:'Эффекты движения',robotMode:'Режим робота',security:'Безопасность транзакции',walletConfirm:'Подтверждение кошельком',telegram:'Доступ Telegram',interface:'Интерфейс',robotTitle:'КИБЕР-СТРАЖ',robotText:'Робот — визуальный страж лотереи. Он отслеживает интерфейс и прогресс лотереи, а каждые 10 секунд реагирует лучами глаз. Робот не управляет вашим кошельком и не может подтвердить платёж вместо вас. Каждый платёж TON должен быть проверен и подтверждён вашим подключённым кошельком.',navHome:'ГЛАВНАЯ',navTickets:'МОИ БИЛЕТЫ',navResults:'РЕЗУЛЬТАТЫ',navSettings:'НАСТРОЙКИ'}};
+  const i18n={fa:{eyebrow:'قرعه‌کشی بزرگ • دور #۱',heroText:'تکت خود را انتخاب کنید و وارد قرعه‌کشی سایبری شوید.',chooseTicket:'انتخاب تکت',moreChances:'شانس بیشتر = احتمال بیشتر',payButton:'✦ پرداخت با TON',myTicketsTitle:'تکت‌های من',myTicketsSub:'تکت‌ها پس از ارسال موفق ذخیره می‌شوند',resultsTitle:'نتایج',resultsText:'نتایج پس از بسته‌شدن دور نمایش داده می‌شوند',settingsTitle:'تنظیمات',settingsSub:'مرکز کنترل قرعه‌کشی',network:'شبکه',round:'دور',ticketLimits:'محدودیت تکت',wallet:'کیف پول',paymentStatus:'وضعیت پرداخت',motion:'افکت‌های حرکتی',robotMode:'حالت ربات',security:'امنیت تراکنش',walletConfirm:'تأیید کیف پول',telegram:'دسترسی تلگرام',interface:'رابط کاربری',robotTitle:'نگهبان سایبری',robotText:'ربات نگهبان تصویری قرعه‌کشی است. وضعیت رابط، پیشرفت زنده قرعه‌کشی و افکت‌های سایبری را پایش می‌کند و هر ۱۰ ثانیه با نور چشم واکنش نشان می‌دهد. ربات به کیف پول شما دسترسی ندارد و نمی‌تواند پرداخت را به‌جای شما تأیید کند؛ هر پرداخت TON باید توسط کیف پول متصل شما بررسی و تأیید شود.',navHome:'خانه',navTickets:'تکت‌های من',navResults:'نتایج',navSettings:'تنظیمات'},en:{eyebrow:'GRAND LOTTERY • ROUND #1',heroText:'Choose your ticket. Enter the cyber lottery.',chooseTicket:'Choose Your Ticket',moreChances:'More chances = stronger odds',payButton:'✦ PAY WITH TON',myTicketsTitle:'MY TICKETS',myTicketsSub:'Tickets stored after successful submission',resultsTitle:'RESULTS',resultsText:'Top confirmed players ranked by total chances',settingsTitle:'SETTINGS',settingsSub:'Lottery control center',network:'Network',round:'Round',ticketLimits:'Ticket limits',wallet:'Wallet',paymentStatus:'Payment status',motion:'Motion effects',robotMode:'Robot mode',security:'Transaction security',walletConfirm:'Wallet confirmation',telegram:'Telegram access',interface:'Interface',robotTitle:'CYBER GUARDIAN',robotText:'The robot is the visual guardian of the lottery. It monitors the live interface, shows lottery progress, reacts with eye-beam effects every 10 seconds, and keeps the cyber environment active. It does not control your wallet and cannot approve a payment for you. Every TON payment must be reviewed and confirmed by your connected wallet.',navHome:'HOME',navTickets:'MY TICKETS',navResults:'RESULTS',navSettings:'SETTINGS'},ru:{eyebrow:'БОЛЬШАЯ ЛОТЕРЕЯ • РАУНД №1',heroText:'Выберите билет и войдите в кибер-лотерею.',chooseTicket:'Выберите билет',moreChances:'Больше шансов = выше вероятность',payButton:'✦ ОПЛАТИТЬ TON',myTicketsTitle:'МОИ БИЛЕТЫ',myTicketsSub:'Билеты сохраняются после успешной отправки',resultsTitle:'РЕЗУЛЬТАТЫ',resultsText:'Результаты появятся после закрытия раунда',settingsTitle:'НАСТРОЙКИ',settingsSub:'Центр управления лотереей',network:'Сеть',round:'Раунд',ticketLimits:'Лимиты билетов',wallet:'Кошелёк',paymentStatus:'Статус платежа',motion:'Эффекты движения',robotMode:'Режим робота',security:'Безопасность транзакции',walletConfirm:'Подтверждение кошельком',telegram:'Доступ Telegram',interface:'Интерфейс',robotTitle:'КИБЕР-СТРАЖ',robotText:'Робот — визуальный страж лотереи. Он отслеживает интерфейс и прогресс лотереи, а каждые 10 секунд реагирует лучами глаз. Робот не управляет вашим кошельком и не может подтвердить платёж вместо вас. Каждый платёж TON должен быть проверен и подтверждён вашим подключённым кошельком.',navHome:'ГЛАВНАЯ',navTickets:'МОИ БИЛЕТЫ',navResults:'РЕЗУЛЬТАТЫ',navSettings:'НАСТРОЙКИ'}};
   function setLanguage(lang){const pack=i18n[lang]||i18n.en;document.documentElement.lang=lang;document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(pack[k])el.textContent=pack[k]});document.querySelectorAll('.lang').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));localStorage.setItem('tonLotteryLanguage',lang)}
   document.querySelectorAll('.lang').forEach(b=>b.addEventListener('click',()=>setLanguage(b.dataset.lang)));
   setLanguage(localStorage.getItem('tonLotteryLanguage')||'fa');
+
+
+  let telegramUser=null;
+
+  function getTelegramInitData(){
+    return window.Telegram?.WebApp?.initData || '';
+  }
+
+  async function initTelegram(){
+    try{
+      if(window.Telegram?.WebApp){
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+      }
+
+      const initData=getTelegramInitData();
+      if(!initData) return null;
+
+      const r=await fetch('/api/telegram/session',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({initData})
+      });
+
+      if(!r.ok) return null;
+
+      const d=await r.json();
+      telegramUser=d.user||null;
+      return telegramUser;
+    }catch(e){
+      console.error('Telegram session failed',e);
+      return null;
+    }
+  }
+
+  function escapeHtml(value){
+    return String(value??'')
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'","&#039;");
+  }
+
+  async function loadLeaderboard(){
+    const box=$('leaderboard');
+
+    if(!box) return;
+
+    try{
+      const r=await fetch('/api/leaderboard',{
+        cache:'no-store'
+      });
+
+      const d=await r.json();
+
+      if(!r.ok){
+        throw new Error(
+          d?.error||'Could not load CUP.'
+        );
+      }
+
+      const rows=Array.isArray(d?.leaderboard)
+        ? d.leaderboard
+        : [];
+
+      if(!rows.length){
+        box.innerHTML=
+          '<div class="empty">No confirmed players yet.</div>';
+        return;
+      }
+
+      box.innerHTML=rows.map(row=>{
+        const name=[
+          row.firstName||'',
+          row.lastName||''
+        ].join(' ').trim()||'Telegram User';
+
+        const username=row.username
+          ? '@'+String(row.username).replace(/^@/,'')
+          : 'No username';
+
+        const photo=row.photoUrl
+          ? '<img class="leader-photo" src="'+
+            escapeHtml(row.photoUrl)+
+            '" alt="">'
+          : '<div class="leader-photo leader-photo-fallback">👤</div>';
+
+        const tickets=Array.isArray(row.tickets)
+          ? row.tickets
+          : [];
+
+        const ticketText=tickets.length
+          ? tickets.map(t=>{
+              const type=escapeHtml(String(t.type||'Ticket'));
+              const count=Number(t.count||0);
+              return '<span class="cup-ticket">'+
+                type+
+                (count>1?' × '+count:'')+
+                '</span>';
+            }).join('')
+          : '<span class="cup-ticket">—</span>';
+
+        const totalTon=Number(row.totalTon||0);
+        const totalChances=Number(row.totalChances||0);
+        const purchases=Number(row.purchases||0);
+
+        return `
+          <div class="leader-row">
+            <div class="leader-rank">#${Number(row.rank||0)}</div>
+
+            ${photo}
+
+            <div class="leader-main">
+              <div class="leader-name">
+                ${escapeHtml(name)}
+              </div>
+
+              <div class="leader-username">
+                ${escapeHtml(username)}
+              </div>
+
+              <div class="leader-id">
+                ID: ${escapeHtml(String(row.userId||''))}
+              </div>
+
+              <div class="leader-tickets">
+                ${ticketText}
+              </div>
+
+              <div class="leader-meta">
+                <span>🎟 ${purchases} ticket${purchases===1?'':'s'}</span>
+                <span>💎 ${totalTon} TON</span>
+                <span>🎯 ${totalChances} Chances</span>
+              </div>
+            </div>
+
+            <div class="leader-score">
+              <strong>${totalChances}</strong>
+              <small>CHANCES</small>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+    }catch(e){
+      console.error('Leaderboard error',e);
+
+      box.innerHTML=
+        '<div class="empty">Could not load CUP.</div>';
+    }
+  }
+
+  setInterval(loadLeaderboard,15000);
 
   let tonUI=null;
   function setStatus(t){$('status').textContent=t}
   async function initTon(){if(!window.TON_CONNECT_UI){setStatus('TON Connect failed to load.');return}tonUI=new TON_CONNECT_UI.TonConnectUI({manifestUrl:location.origin+'/tonconnect-manifest.json',buttonRootId:'ton-connect'});tonUI.onStatusChange(w=>{setStatus(w?'Wallet connected.':'Connect your TON wallet to continue.');const sw=$('settingsWallet');if(sw)sw.textContent=w?'Connected':'Not connected'})}
   initTon();
-  $('payBtn').addEventListener('click',async()=>{try{if(!tonUI){setStatus('TON Connect is not ready.');return}if(!tonUI.wallet){await tonUI.openModal();if(!tonUI.wallet){setStatus('Wallet connection cancelled.');return}}const cfg=await (await fetch('/api/config')).json();const treasury=String(cfg?.treasuryAddress||'').trim();if(!treasury){setStatus('Treasury address is not configured.');return}const nano=String(Math.round(selected.price*1000000000));$('payBtn').disabled=true;setStatus('Confirm the selected ticket in your wallet.');const result=await tonUI.sendTransaction({validUntil:Math.floor(Date.now()/1000)+300,network:'-239',messages:[{address:treasury,amount:nano}]});console.log('TON Connect response',result);const list=JSON.parse(localStorage.getItem('tonLotteryTickets')||'[]');list.unshift({type:selected.type,price:selected.price,chances:selected.chances,time:new Date().toISOString()});localStorage.setItem('tonLotteryTickets',JSON.stringify(list.slice(0,50)));renderTickets();setStatus('Transaction submitted. On-chain confirmation is pending.')}catch(e){setStatus(e?.message||'Transaction cancelled or failed.')}finally{$('payBtn').disabled=false}});
+  $('payBtn').addEventListener('click',async()=>{
+    let intentId=null;
+
+    try{
+      if(!tonUI){
+        setStatus('TON Connect is not ready.');
+        return;
+      }
+
+      if(!tonUI.wallet){
+        await tonUI.openModal();
+        if(!tonUI.wallet){
+          setStatus('Wallet connection cancelled.');
+          return;
+        }
+      }
+
+      const initData=getTelegramInitData();
+      if(!initData){
+        setStatus('Open the app from Telegram.');
+        return;
+      }
+
+      const walletAddress=String(
+        tonUI.wallet?.account?.address||''
+      ).trim();
+
+      if(!walletAddress){
+        setStatus('Wallet address is unavailable.');
+        return;
+      }
+
+      const intentResponse=await fetch('/api/payment/intent',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          initData,
+          type:selected.type,
+          walletAddress
+        })
+      });
+
+      const intentData=await intentResponse.json();
+
+      if(!intentResponse.ok||!intentData?.ok){
+        throw new Error(
+          intentData?.error||'Could not create payment intent.'
+        );
+      }
+
+      intentId=intentData.intent?.id;
+
+      if(!intentId){
+        throw new Error('Payment intent was not created.');
+      }
+
+      const cfg=await (await fetch('/api/config')).json();
+      const treasury=String(cfg?.treasuryAddress||'').trim();
+
+      if(!treasury){
+        throw new Error('Treasury address is not configured.');
+      }
+
+      const nano=String(
+        Math.round(selected.price*1000000000)
+      );
+
+      $('payBtn').disabled=true;
+      setStatus('Confirm the selected ticket in your wallet.');
+
+      await tonUI.sendTransaction({
+        validUntil:Math.floor(Date.now()/1000)+300,
+        network:'-239',
+        messages:[{
+          address:treasury,
+          amount:nano
+        }]
+      });
+
+      setStatus('Transaction sent. Waiting for on-chain confirmation...');
+
+      let confirmed=false;
+      let verifyData=null;
+
+      for(let attempt=1;attempt<=12;attempt++){
+        await new Promise(resolve=>setTimeout(resolve,5000));
+
+        const verifyResponse=await fetch('/api/payment/verify',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            initData,
+            intentId
+          })
+        });
+
+        verifyData=await verifyResponse.json();
+
+        if(!verifyResponse.ok){
+          throw new Error(
+            verifyData?.error||'Payment verification failed.'
+          );
+        }
+
+        if(verifyData?.confirmed===true){
+          confirmed=true;
+          break;
+        }
+
+        setStatus(
+          'Waiting for blockchain confirmation... '+
+          attempt+'/12'
+        );
+      }
+
+      if(!confirmed){
+        setStatus(
+          'Transaction was sent, but confirmation is still pending.'
+        );
+        return;
+      }
+
+      const purchase=verifyData.purchase||{};
+
+      const list=JSON.parse(
+        localStorage.getItem('tonLotteryTickets')||'[]'
+      );
+
+      list.unshift({
+        type:purchase.type||selected.type,
+        price:Number(purchase.price??selected.price),
+        chances:Number(purchase.chances??selected.chances),
+        time:new Date().toISOString(),
+        confirmed:true,
+        txHash:purchase.txHash||null
+      });
+
+      localStorage.setItem(
+        'tonLotteryTickets',
+        JSON.stringify(list.slice(0,50))
+      );
+
+      renderTickets();
+
+      setStatus(
+        'Payment confirmed successfully. Your chances are now live in CUP.'
+      );
+
+      await loadLeaderboard();
+
+      const resultsTab=document.querySelector(
+        '[data-view="results"]'
+      );
+
+      if(resultsTab){
+        resultsTab.click();
+      }
+
+    }catch(e){
+      console.error('Payment flow error',e);
+      setStatus(
+        e?.message||'Transaction cancelled or failed.'
+      );
+    }finally{
+      $('payBtn').disabled=false;
+    }
+  });console.log('TON Connect response',result);const list=JSON.parse(localStorage.getItem('tonLotteryTickets')||'[]');list.unshift({type:selected.type,price:selected.price,chances:selected.chances,time:new Date().toISOString()});localStorage.setItem('tonLotteryTickets',JSON.stringify(list.slice(0,50)));renderTickets();setStatus('Transaction submitted. On-chain confirmation is pending.')}catch(e){setStatus(e?.message||'Transaction cancelled or failed.')}finally{$('payBtn').disabled=false}});
 })();
 </script>
 </body></html>

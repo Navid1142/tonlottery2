@@ -1,2 +1,18 @@
 .env
 node_modules/
+server/.toncenter-key
+
+# Local backups and temporary patch files
+*.backup
+*.backup-*
+*.before-*
+web/*.backup*
+web/*.before-*
+server/*.backup*
+server/*.before-*
+server/start-test.log
+apply_*.py
+patch_*.py
+rebuild_*.py
+index_part_*
+.ende*
