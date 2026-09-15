@@ -205,7 +205,7 @@ async function toncenter(pathname, params = {}) {
   return data;
 }
 
-async function findConfirmedPayment(intent) {
+async function findConfirmedPayment(intent, boc = '') {
   if (!TREASURY_ADDRESS) {
     throw new Error('TREASURY_ADDRESS is not configured');
   }
@@ -216,12 +216,14 @@ async function findConfirmedPayment(intent) {
 
   const sender = normalizeAddress(intent.walletAddress);
   const treasury = normalizeAddress(TREASURY_ADDRESS);
+  const expectedComment = String(intent.paymentComment || '');
 
-  const start = Math.floor(intent.createdAt / 1000) - 30;
-  const end = Math.floor(Date.now() / 1000) + 30;
+  const start = Math.floor(intent.createdAt / 1000) - 120;
+  const end = Math.floor(Date.now() / 1000) + 120;
 
   const data = await toncenter('/messages', {
     destination: treasury,
+    source: sender,
     direction: 'in',
     start_utime: start,
     end_utime: end,
@@ -245,7 +247,6 @@ async function findConfirmedPayment(intent) {
     if (source !== sender) continue;
 
     let value;
-
     try {
       value = BigInt(String(message?.value || '0'));
     } catch {
@@ -253,6 +254,42 @@ async function findConfirmedPayment(intent) {
     }
 
     if (value !== expectedNano) continue;
+
+    const body =
+      message?.message_content?.body ||
+      message?.body ||
+      '';
+
+    let comment = '';
+
+    if (body) {
+      try {
+        const raw = Buffer.from(String(body), 'base64');
+
+        if (raw.length >= 4) {
+          const opcode = raw.readUInt32BE(0);
+
+          if (opcode === 0) {
+            comment = raw
+              .subarray(4)
+              .toString('utf8')
+              .replace(/\0+$/g, '');
+          }
+        }
+      } catch {
+        comment = '';
+      }
+    }
+
+    if (expectedComment && comment !== expectedComment) {
+      continue;
+    }
+
+    console.log(
+      '[payment/verify] matched payment',
+      'commentMatch:', comment === expectedComment,
+      'hasBoc:', Boolean(boc)
+    );
 
     return {
       found: true,
@@ -265,7 +302,8 @@ async function findConfirmedPayment(intent) {
       source: message?.source || intent.walletAddress,
       destination: message?.destination || TREASURY_ADDRESS,
       valueNano: value.toString(),
-      createdAt: Number(message?.created_at || 0)
+      createdAt: Number(message?.created_at || 0),
+      paymentComment: comment
     };
   }
 
@@ -535,7 +573,8 @@ app.post('/api/payment/intent', (req, res) => {
       chances: ticket.chances,
       createdAt: Date.now(),
       confirmedAt: null,
-      txHash: null
+      txHash: null,
+      paymentComment: 'TONLOTTERY:' + crypto.randomUUID()
     };
 
     purchases.push(intent);
@@ -545,7 +584,8 @@ app.post('/api/payment/intent', (req, res) => {
       ok: true,
       intentId: intent.id,
       price: ticket.price,
-      chances: ticket.chances
+      chances: ticket.chances,
+      paymentComment: intent.paymentComment
     });
   } catch (error) {
     console.error('[payment/intent]', error);
@@ -566,6 +606,7 @@ app.post('/api/payment/verify', async (req, res) => {
     }
 
     const intentId = String(req.body?.intentId || '');
+    const boc = String(req.body?.boc || '');
 
     if (!intentId) {
       return res.status(400).json({
@@ -603,7 +644,7 @@ app.post('/api/payment/verify', async (req, res) => {
       });
     }
 
-    const result = await findConfirmedPayment(intent);
+    const result = await findConfirmedPayment(intent, boc);
 
     if (!result.found) {
       return res.json({

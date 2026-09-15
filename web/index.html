@@ -565,7 +565,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:10p
           network:'-239',
           messages:[{
             address:treasury,
-            amount:nano
+            amount:nano,
+            payload:intentData.paymentPayload
           }]
         });
 
@@ -597,7 +598,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:10p
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify({
             initData,
-            intentId
+            intentId,
+            boc:txResult?.boc||''
           })
         });
 
@@ -672,6 +674,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:10p
       $('payBtn').disabled=false;
     }
 });
+  try{
+    await initTelegram();
+  }catch(e){
+    console.error('Telegram initialization error',e);
+  }
+
 })();
 </script>
 </body></html>
