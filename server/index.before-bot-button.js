@@ -1,66 +1,9 @@
-const { Bot } = require('node-telegram-bot-api');
+const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config();
 const express=require('express');
 const crypto=require('crypto');
 const path=require('path');
 const app=express();
-const botToken=process.env.TELEGRAM_BOT_TOKEN;
-const publicAppUrl=String(process.env.PUBLIC_APP_URL||'').trim();
-
-if(botToken){
-  const bot=new Bot(botToken);
-
-  bot.command('start',async (ctx)=>{
-    try{
-      await ctx.reply(
-        '🎯 Welcome to TON Lottery!\\n\\nTap the button below to open the Mini App.',
-        {
-          reply_markup:{
-            inline_keyboard:[
-              [
-                {
-                  text:'🎯 Open App',
-                  web_app:{url:publicAppUrl}
-                }
-              ]
-            ]
-          }
-        }
-      );
-    }catch(error){
-      console.error('[bot] /start failed:',error.message);
-    }
-  });
-
-  if(publicAppUrl){
-    bot.api.setChatMenuButton({
-      menu_button:{
-        type:'web_app',
-        text:'🎯 Open App',
-        web_app:{url:publicAppUrl}
-      }
-    }).then(()=>{
-      console.log('[bot] Menu Button configured');
-    }).catch(error=>{
-      console.error('[bot] Menu Button setup failed:',error.message);
-    });
-  }else{
-    console.warn('[bot] PUBLIC_APP_URL is missing');
-  }
-
-  bot.catch((error)=>{
-    console.error('[bot] handler error:',error.message);
-  });
-
-  bot.startPolling().then(()=>{
-    console.log('[bot] Telegram bot started');
-  }).catch(error=>{
-    console.error('[bot] polling start failed:',error.message);
-  });
-}else{
-  console.warn('[bot] TELEGRAM_BOT_TOKEN is missing; bot disabled');
-}
-
 const PORT=process.env.PORT||3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname,'..','web')));
